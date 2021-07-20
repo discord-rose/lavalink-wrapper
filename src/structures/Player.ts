@@ -1,13 +1,14 @@
-import { LavalinkManager } from './LavalinkManager'
-import { Node } from './Node'
-import { Track, TrackPartial } from './Track'
+import { LavalinkManager, Node, Track, TrackPartial } from '../typings/lib'
+import { Track as TrackClass, TrackPartial as TrackPartialClass } from './Track'
 
-import { Filters, LoopType, PlayerOptions, PlayerState, PlayOptions } from '../typings/lib'
+import { Filters } from '../typings/Lavalink'
 
 import { APIRole, ChannelType } from 'discord-api-types'
 import Collection from '@discordjs/collection'
 import { EventEmitter } from '@jpbberry/typed-emitter'
 import { PermissionsUtils, Snowflake } from 'discord-rose'
+
+export type LoopType = 'off' | 'single' | 'queue'
 
 export interface PlayerEvents {
   /**
@@ -55,6 +56,86 @@ export interface PlayerEvents {
    * Emitted when the server sends a track stuck event.
    */
   TRACK_STUCK: { player: Player, track: Track, thresholdMs: number }
+}
+
+export interface PlayerOptions {
+  /**
+   * The guild ID to bind the player to.
+   */
+  guildId: Snowflake
+  /**
+   * The text channel ID to bind the player to.
+   */
+  textChannelId: Snowflake
+  /**
+   * The voice channel ID to bind the player to.
+   */
+  voiceChannelId: Snowflake
+  /**
+   * If the bot should self mute.
+   * @default false
+   */
+  selfMute?: boolean
+  /**
+   * If the bot should self deafen.
+   * @default true
+   */
+  selfDeafen?: boolean
+  /**
+   * The amount of time to allow to connect to a VC before timing out.
+   * @default 15000
+   */
+  connectionTimeout?: number
+  /**
+   * If the bot should request to or become a speaker in stage channels depending on it's permissions.
+   * @default true
+   */
+  becomeSpeaker?: boolean
+  /**
+   * Behavior to use when the bot is moved from the VC (This includes the bot being disconnected).
+   * 'destroy' will destroy the player.
+   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is reconnected to the VC.
+   * @default 'destroy'
+   */
+  moveBehavior?: 'destroy' | 'pause'
+  /**
+   * Behavior to use when the bot is moved to the audience in a stage channel. This has no effect if becomeSpeaker is false.
+   * 'destroy' will destroy the player.
+   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is a speaker again. The bot will also request to speak, or become a speaker if it cannot request.
+   * @default 'pause'
+   */
+  stageMoveBehavior?: 'destroy' | 'pause'
+}
+
+export enum PlayerState {
+  DISCONNECTED,
+  CONNECTING,
+  CONNECTED,
+  PAUSED,
+  PLAYING,
+  DESTROYED
+}
+
+export interface PlayOptions {
+  /**
+   * The number of milliseconds to offset the track by.
+   * @default 0
+   */
+  startTime?: number
+  /**
+   * The number of milliseconds at which point the track should stop playing. Defaults to the track's length.
+   */
+  endTime?: number
+  /**
+   * The volume to use. Minimum value of 0, maximum value of 1000.
+   * @default 100
+   */
+  volume?: number
+  /**
+   * If true, playback will be paused when the track starts. This is ignored if the bot is in the audience in a stage.
+   * @default false
+   */
+  pause?: boolean
 }
 
 export class Player extends EventEmitter<PlayerEvents> {
@@ -265,8 +346,8 @@ export class Player extends EventEmitter<PlayerEvents> {
 
     if (this.state === PlayerState.CONNECTED) {
       const newPosition = track instanceof Array ? this.queue.length - track.length : this.queue.length - 1
-      if (this.queue[newPosition] instanceof TrackPartial) this.queue[newPosition] = await this.manager.resolveTrack(this.queue[newPosition])
-      if (!(this.queue[newPosition] instanceof Track) || !(this.queue[newPosition] as Track).track) throw new TypeError('Invalid track')
+      if (this.queue[newPosition] instanceof TrackPartialClass) this.queue[newPosition] = await this.manager.resolveTrack(this.queue[newPosition])
+      if (!(this.queue[newPosition] instanceof TrackClass) || !(this.queue[newPosition] as Track).track) throw new TypeError('Invalid track')
       await this._play(this.queue[newPosition] as Track, options)
       this.queuePosition = newPosition
     }
@@ -284,8 +365,8 @@ export class Player extends EventEmitter<PlayerEvents> {
     })
     if (typeof index === 'number') {
       if (index < 0 || index >= this.queue.length) throw new Error('Invalid index')
-      if (this.queue[index] instanceof TrackPartial) this.queue[index] = await this.manager.resolveTrack(this.queue[index])
-      if (!(this.queue[index] instanceof Track) || !(this.queue[index] as Track).track) throw new TypeError('Invalid track')
+      if (this.queue[index] instanceof TrackPartialClass) this.queue[index] = await this.manager.resolveTrack(this.queue[index])
+      if (!(this.queue[index] instanceof TrackClass) || !(this.queue[index] as Track).track) throw new TypeError('Invalid track')
       await this._play(this.queue[index] as Track)
       this.queuePosition = index
     } else await this._advanceQueue()
@@ -397,8 +478,8 @@ export class Player extends EventEmitter<PlayerEvents> {
     }
 
     if (this.queue[this.queuePosition]) {
-      if (this.queue[this.queuePosition] instanceof TrackPartial) this.queue[this.queuePosition] = await this.manager.resolveTrack(this.queue[this.queuePosition])
-      if (!(this.queue[this.queuePosition] instanceof Track) || !(this.queue[this.queuePosition] as Track).track) {
+      if (this.queue[this.queuePosition] instanceof TrackPartialClass) this.queue[this.queuePosition] = await this.manager.resolveTrack(this.queue[this.queuePosition])
+      if (!(this.queue[this.queuePosition] instanceof TrackClass) || !(this.queue[this.queuePosition] as Track).track) {
         this.emit('ERROR', { player: this, error: new Error('Unable to get Track from new queue position while advancing the queue') })
         if (this.loop === 'single') this.queuePosition++
         await this._advanceQueue()

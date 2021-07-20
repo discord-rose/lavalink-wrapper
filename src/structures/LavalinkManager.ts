@@ -1,8 +1,9 @@
-import { Node } from './Node'
-import { Player } from './Player'
-import { Track, TrackPartial } from './Track'
+import { Node, Player, Track, TrackPartial } from '../typings/lib'
+import { Node as NodeClass, NodeOptions, NodeState } from './Node'
+import { Player as PlayerClass, PlayerOptions } from './Player'
+import { Track as TrackClass, TrackPartial as TrackPartialClass } from './Track'
 
-import { LavalinkManagerOptions, NodeState, PlayerOptions, SearchResult, Source, TrackData } from '../typings/lib'
+import { TrackData } from '../typings/Lavalink'
 
 import Constants from '../util/Constants'
 
@@ -87,6 +88,65 @@ export interface LavalinkManagerEvents {
   PLAYER_TRACK_STUCK: { player: Player, track: Track, thresholdMs: number }
 }
 
+export interface LavalinkManagerOptions {
+  /**
+   * An array of nodes to connect to.
+   */
+  nodeOptions: NodeOptions[]
+  /**
+   * An array of enabled sources.
+   * If spotify is specified, the spotifyAuth option should also be defined.
+   * @default ['youtube', 'soundcloud']
+   */
+  enabledSources?: Source[]
+  /**
+   * The default source to use for searches.
+   * @default 'youtube'
+   */
+  defaultSource?: Source
+  /**
+   * Authentication for the spotify API.
+   * This will enable resolving spotify links into youtube tracks.
+   */
+  spotifyAuth?: {
+    clientId: string
+    clientSecret: string
+  }
+}
+
+/**
+ * The result from a search.
+ */
+export interface SearchResult {
+  /**
+   * The result's load type.
+   */
+  loadType: 'TRACK_LOADED' | 'PLAYLIST_LOADED' | 'SEARCH_RESULT' | 'NO_MATCHES' | 'LOAD_FAILED'
+  /**
+   * The found tracks.
+   */
+  tracks: Array<Track | TrackPartial>
+  /**
+   * Playlist info, if applicable.
+   */
+  playlistInfo?: {
+    name: string
+    selectedTrack: Track | null
+  }
+  /**
+   * An exception, if applicable.
+   */
+  exception?: {
+    message: string
+    severity: string
+  }
+}
+
+/**
+ * A search source.
+ */
+export type Source = 'youtube' | 'soundcloud'
+
 export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
   /**
    * The manager's nodes.
@@ -122,7 +182,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     if (options.enabledSources && options.defaultSource && !options.enabledSources.includes(options.defaultSource)) throw new Error('Default source must be defined in enabled sources')
     if (options.spotifyAuth && (!options.spotifyAuth.clientId || !options.spotifyAuth.clientSecret)) throw new Error('Spotify auth is not properly defined')
 
-    for (const [i, nodeOption] of options.nodeOptions.entries()) this.nodes.set(i, new Node(nodeOption, i, this))
+    for (const [i, nodeOption] of options.nodeOptions.entries()) this.nodes.set(i, new NodeClass(nodeOption, i, this))
 
     this.options = {
       nodeOptions: options.nodeOptions,
@@ -181,7 +241,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     if (!options?.guildId) throw new TypeError('Expected options.guildId to be defined')
     if (this.players.get(options.guildId)) throw new Error('A player already exists for that guild')
     if (!this.leastLoadNodes[0]) throw new Error('No available nodes to bind the player to')
-    const player = new Player(options, this.leastLoadNodes[0], this)
+    const player = new PlayerClass(options, this.leastLoadNodes[0], this)
     this.players.set(options.guildId, player)
     return player
   }
@@ -222,14 +282,14 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
             }
           }
         }
-        const tracks = data.tracks.items.map((t) => new TrackPartial(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms))
+        const tracks = data.tracks.items.map((t) => new TrackPartialClass(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms))
         let next = data.tracks.next
         while (next) {
           const nextRes = await fetch(next, {
             method: 'GET', headers
           })
           const nextData = await nextRes.json()
-          if (nextData?.items?.length) tracks.push(...nextData.items.map((t) => new TrackPartial(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms)))
+          if (nextData?.items?.length) tracks.push(...nextData.items.map((t) => new TrackPartialClass(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms)))
           if (nextData?.next) next = nextData.next
           else next = null
         }
@@ -248,7 +308,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
         const data = await res.json()
         return {
           loadType: 'TRACK_LOADED',
-          tracks: [new TrackPartial(data.track.name, requester, data.track.artists.map((a) => a.name).join(', '), data.track.duration_ms)]
+          tracks: [new TrackPartialClass(data.track.name, requester, data.track.artists.map((a) => a.name).join(', '), data.track.duration_ms)]
         }
       }
     } else {
@@ -258,7 +318,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
 
       const searchResult: SearchResult = {
         loadType: res.json.loadType,
-        tracks: res.json.tracks.map((data: TrackData) => new Track(data, requester)),
+        tracks: res.json.tracks.map((data: TrackData) => new TrackClass(data, requester)),
         exception: res.json.exception
       }
       if (res.json.playlistInfo) {
@@ -283,12 +343,12 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
 
     const res = await decodeNode.request('POST', '/decodetracks', { body: tracks })
     if (!res?.json) throw new Error('No decode response data')
-    return (res.json as []).map((data: TrackData) => new Track(data, 'N/A'))
+    return (res.json as []).map((data: TrackData) => new TrackClass(data, 'N/A'))
   }
 
   public async resolveTrack (track: TrackPartial): Promise<Track> {
     const search = await this.search(`${track.title}${track.author ? ` - ${track.author}` : ''}`, track.requester)
-    search.tracks = search.tracks.filter((t) => t instanceof Track)
+    search.tracks = search.tracks.filter((t) => t instanceof TrackClass)
     if (search.loadType !== 'SEARCH_RESULT' || !search.tracks.length) throw new Error('No results found')
     if (track.author) {
       const sameAuthor = search.tracks.filter((t) => [track.author ?? '', `${track.author ?? ''} - Topic`].some((name) => new RegExp(`^${name?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i').test(t.author ?? '') ?? new RegExp(`^${name?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i').test(t.title ?? ''))) as Track[]

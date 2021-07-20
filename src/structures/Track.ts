@@ -1,4 +1,6 @@
-import { ThumbnailResolution, TrackData } from '../typings/lib'
+import { TrackData } from '../typings/Lavalink'
+
+export type ThumbnailResolution = 'default' | 'mqdefault' | 'hqdefault' | 'maxresdefault'
 
 /**
  * Track partial - represents an unresolved track.
