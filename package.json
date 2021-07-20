@@ -14,9 +14,10 @@
     "url": "git+https://github.com/discord-rose/lavalink-wrapper.git"
   },
   "keywords": [
-    "lavalink",
     "discord",
-    "discordapp"
+    "discord-bot",
+    "discord-rose",
+    "lavalink"
   ],
   "author": "BR88C",
   "license": "ISC",
