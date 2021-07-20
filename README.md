@@ -11,6 +11,7 @@ const { Master } = require('discord-rose')
 const path = require('path')
 
 const master = new Master(path.resolve(__dirname, './worker.js'), {
+  cache: { voiceStates: true },
   token: 'BOT TOKEN'
 })
 
@@ -45,7 +46,7 @@ worker.commands
   .add({
     command: 'play',
     exec: async (ctx) => {
-      // The 2 lines below assume you are caching voiceStates to find the invoking user's voice channel.
+      // Get the invoking user's voice channel.
       const foundVoiceState = ctx.worker.voiceStates.find((state) => state.guild_id === ctx.message.guild_id && state.users.has(ctx.author.id))
       if (!foundVoiceState) return ctx.error(`You must be in a voice channel to play music.`)
 
