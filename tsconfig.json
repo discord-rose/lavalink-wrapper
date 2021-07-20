@@ -1,0 +1,15 @@
+{
+  "include": ["./src/**/*"],
+  "exclude": ["./test"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "declaration": true,
+    "strict": false,
+    "lib": ["ES2020"],
+    "module": "commonjs",
+    "outDir": "dist",
+    "esModuleInterop": true
+  }
+}
