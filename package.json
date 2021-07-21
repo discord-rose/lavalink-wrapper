@@ -28,7 +28,7 @@
   "dependencies": {
     "@discordjs/collection": "^0.2.0",
     "@jpbberry/typed-emitter": "^1.0.1",
-    "discord-api-types": "^0.19.0-next.4a83629.1626093261",
+    "discord-api-types": "^0.21.0-next.f0f44e6.1626784179",
     "discord-rose": "^1.4.5",
     "node-fetch": "^2.6.1",
     "query-string": "^7.0.1",
