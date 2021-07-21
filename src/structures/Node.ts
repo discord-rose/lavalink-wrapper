@@ -4,7 +4,7 @@ import { NodeStats } from '../typings/Lavalink'
 
 import { EventEmitter } from '@jpbberry/typed-emitter'
 import fetch, { Headers, Response } from 'node-fetch'
-import { stringify } from 'querystring'
+import { URLSearchParams } from 'url'
 import WebSocket from 'ws'
 
 export interface NodeEvents {
@@ -290,7 +290,7 @@ export class Node extends EventEmitter<NodeEvents> {
     return await new Promise((resolve, reject) => {
       const timedOut = setTimeout(() => reject(new Error('408 Timed out on request')), this.options.requestTimeout)
 
-      fetch(`http${this.options.secure ? 's' : ''}://${this.options.host!}:${this.options.port!}/${route.replace(/^\//gm, '')}${options.query ? `?${stringify(options.query)}` : ''}`, {
+      fetch(`http${this.options.secure ? 's' : ''}://${this.options.host!}:${this.options.port!}/${route.replace(/^\//gm, '')}${options.query ? `?${new URLSearchParams(options.query).toString()}` : ''}`, {
         method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined
       }).then(async (res) => {
         const json = res.status === 204 ? null : await res.json()
