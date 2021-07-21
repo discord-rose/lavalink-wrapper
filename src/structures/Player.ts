@@ -373,6 +373,28 @@ export class Player extends EventEmitter<PlayerEvents> {
   }
 
   /**
+   * Shuffles the queue and starts playing the first track.
+   */
+  public async shuffle (): Promise<void> {
+    if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING) throw new Error('Cannot shuffle when the player isn\'t in a connected, paused, or playing state')
+    await this.node.send({
+      op: 'stop',
+      guildId: this.options.guildId
+    })
+    let currentIndex = this.queue.length
+    let randomIndex = 0
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex)
+      currentIndex--
+      [this.queue[currentIndex], this.queue[randomIndex]] = [this.queue[randomIndex], this.queue[currentIndex]]
+    }
+    if (this.queue[0] instanceof TrackPartialClass) this.queue[0] = await this.manager.resolveTrack(this.queue[0])
+    if (!(this.queue[0] instanceof TrackClass) || !(this.queue[0]).track) throw new Error('Invalid track at new queue position 0')
+    await this._play(this.queue[0])
+    this.queuePosition = 0
+  }
+
+  /**
    * Seek to a desired position.
    * @param position The position in the track to seek to, in milliseconds.
    */
