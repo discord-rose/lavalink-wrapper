@@ -490,6 +490,8 @@ class Player extends typed_emitter_1.EventEmitter {
      * @param payload The received payload.
      */
     async _handlePayload({ node, payload }) {
+        if (payload.guildId !== this.options.guildId)
+            return;
         if (payload.op === 'playerUpdate') {
             this.position = payload.state.position ?? null;
         }
