@@ -314,4 +314,8 @@ export declare class Player extends EventEmitter<PlayerEvents> {
      * @param options Options to use in the play payload.
      */
     private _play;
+    /**
+     * Helper function for sending stop payloads to the server.
+     */
+    private _stop;
 }

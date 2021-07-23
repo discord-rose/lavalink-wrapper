@@ -234,10 +234,7 @@ class Player extends typed_emitter_1.EventEmitter {
     async skip(index) {
         if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING)
             throw new Error('Cannot skip when the player isn\'t in a connected, paused, or playing state');
-        await this.node.send({
-            op: 'stop',
-            guildId: this.options.guildId
-        });
+        await this._stop();
         if (typeof index === 'number') {
             if (index < 0 || index >= this.queue.length)
                 throw new Error('Invalid index');
@@ -257,10 +254,7 @@ class Player extends typed_emitter_1.EventEmitter {
     async shuffle() {
         if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING)
             throw new Error('Cannot shuffle when the player isn\'t in a connected, paused, or playing state');
-        await this.node.send({
-            op: 'stop',
-            guildId: this.options.guildId
-        });
+        await this._stop();
         let currentIndex = this.queue.length;
         let randomIndex = 0;
         while (currentIndex !== 0) {
@@ -326,11 +320,7 @@ class Player extends typed_emitter_1.EventEmitter {
     async stop() {
         if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING)
             throw new Error('Cannot stop when the player isn\'t in a connected, paused, or playing state');
-        await this.node.send({
-            op: 'stop',
-            guildId: this.options.guildId
-        });
-        this.position = null;
+        await this._stop();
         this.queuePosition = null;
     }
     /**
@@ -513,11 +503,7 @@ class Player extends typed_emitter_1.EventEmitter {
                         void this._advanceQueue();
                     break;
                 case 'TrackExceptionEvent':
-                    void this.stop();
-                    this.position = null;
-                    this.state = PlayerState.CONNECTED;
                     this.emit('TRACK_EXCEPTION', { player: this, track: this.queue[this.queuePosition ?? 0] ?? null, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause });
-                    void this._advanceQueue();
                     break;
                 case 'TrackStartEvent':
                     if (this.sentPausedPlay) {
@@ -529,9 +515,7 @@ class Player extends typed_emitter_1.EventEmitter {
                     this.emit('TRACK_START', { player: this, track: this.queue[this.queuePosition ?? 0] });
                     break;
                 case 'TrackStuckEvent':
-                    void this.stop();
-                    this.position = null;
-                    this.state = PlayerState.CONNECTED;
+                    await this._stop().catch(() => { });
                     this.emit('TRACK_STUCK', { player: this, track: this.queue[this.queuePosition ?? 0], thresholdMs: payload.thresholdMs });
                     void this._advanceQueue();
                     break;
@@ -564,6 +548,17 @@ class Player extends typed_emitter_1.EventEmitter {
             guildId: this.options.guildId,
             track: track.track
         }, options));
+    }
+    /**
+     * Helper function for sending stop payloads to the server.
+     */
+    async _stop() {
+        await this.node.send({
+            op: 'stop',
+            guildId: this.options.guildId
+        });
+        this.position = null;
+        this.state = PlayerState.CONNECTED;
     }
 }
 exports.Player = Player;
