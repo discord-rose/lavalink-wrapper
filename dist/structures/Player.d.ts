@@ -54,7 +54,7 @@ export interface PlayerEvents {
      */
     TRACK_END: {
         player: Player;
-        track: Track;
+        track: Track | null;
         reason: string;
     };
     /**
@@ -72,14 +72,14 @@ export interface PlayerEvents {
      */
     TRACK_START: {
         player: Player;
-        track: Track;
+        track: Track | null;
     };
     /**
      * Emitted when the server sends a track stuck event.
      */
     TRACK_STUCK: {
         player: Player;
-        track: Track;
+        track: Track | null;
         thresholdMs: number;
     };
 }

@@ -494,9 +494,10 @@ class Player extends typed_emitter_1.EventEmitter {
             this.position = payload.state.position ?? null;
         }
         else if (payload.op === 'event') {
-            const track = (await this.manager.decodeTracks([payload.track]))[0];
+            const track = typeof payload.track === 'string' ? (await this.manager.decodeTracks([payload.track]))[0] : null;
             // @ts-expect-error Cannot assign to 'requester' because it is a read-only property.
-            track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title);
+            if (track)
+                track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title);
             switch (payload.type) {
                 case 'TrackEndEvent':
                     this.position = null;

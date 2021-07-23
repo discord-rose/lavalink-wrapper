@@ -96,7 +96,7 @@ export interface LavalinkManagerEvents {
      */
     PLAYER_TRACK_END: {
         player: Player;
-        track: Track;
+        track: Track | null;
         reason: string;
     };
     /**
@@ -114,14 +114,14 @@ export interface LavalinkManagerEvents {
      */
     PLAYER_TRACK_START: {
         player: Player;
-        track: Track;
+        track: Track | null;
     };
     /**
      * Emitted when the server sends a track stuck event.
      */
     PLAYER_TRACK_STUCK: {
         player: Player;
-        track: Track;
+        track: Track | null;
         thresholdMs: number;
     };
 }
