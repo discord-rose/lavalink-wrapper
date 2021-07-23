@@ -359,10 +359,7 @@ export class Player extends EventEmitter<PlayerEvents> {
    */
   public async skip (index?: number): Promise<void> {
     if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING) throw new Error('Cannot skip when the player isn\'t in a connected, paused, or playing state')
-    await this.node.send({
-      op: 'stop',
-      guildId: this.options.guildId
-    })
+    await this._stop()
     if (typeof index === 'number') {
       if (index < 0 || index >= this.queue.length) throw new Error('Invalid index')
       if (this.queue[index] instanceof TrackPartialClass) this.queue[index] = await this.manager.resolveTrack(this.queue[index])
@@ -377,10 +374,7 @@ export class Player extends EventEmitter<PlayerEvents> {
    */
   public async shuffle (): Promise<void> {
     if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING) throw new Error('Cannot shuffle when the player isn\'t in a connected, paused, or playing state')
-    await this.node.send({
-      op: 'stop',
-      guildId: this.options.guildId
-    })
+    await this._stop()
     let currentIndex = this.queue.length
     let randomIndex = 0
     while (currentIndex !== 0) {
@@ -442,11 +436,7 @@ export class Player extends EventEmitter<PlayerEvents> {
    */
   public async stop (): Promise<void> {
     if (this.state !== PlayerState.CONNECTED && this.state !== PlayerState.PAUSED && this.state !== PlayerState.PLAYING) throw new Error('Cannot stop when the player isn\'t in a connected, paused, or playing state')
-    await this.node.send({
-      op: 'stop',
-      guildId: this.options.guildId
-    })
-    this.position = null
+    await this._stop()
     this.queuePosition = null
   }
 
@@ -617,11 +607,7 @@ export class Player extends EventEmitter<PlayerEvents> {
           if (payload.reason !== 'STOPPED' && payload.reason !== 'REPLACED') void this._advanceQueue()
           break
         case 'TrackExceptionEvent':
-          void this.stop()
-          this.position = null
-          this.state = PlayerState.CONNECTED
           this.emit('TRACK_EXCEPTION', { player: this, track: this.queue[this.queuePosition ?? 0] ?? null, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause })
-          void this._advanceQueue()
           break
         case 'TrackStartEvent':
           if (this.sentPausedPlay) {
@@ -631,9 +617,7 @@ export class Player extends EventEmitter<PlayerEvents> {
           this.emit('TRACK_START', { player: this, track: this.queue[this.queuePosition ?? 0] as Track })
           break
         case 'TrackStuckEvent':
-          void this.stop()
-          this.position = null
-          this.state = PlayerState.CONNECTED
+          await this._stop().catch(() => {})
           this.emit('TRACK_STUCK', { player: this, track: this.queue[this.queuePosition ?? 0] as Track, thresholdMs: payload.thresholdMs })
           void this._advanceQueue()
           break
@@ -663,5 +647,17 @@ export class Player extends EventEmitter<PlayerEvents> {
       guildId: this.options.guildId,
       track: track.track
     }, options))
+  }
+
+  /**
+   * Helper function for sending stop payloads to the server.
+   */
+  private async _stop (): Promise<void> {
+    await this.node.send({
+      op: 'stop',
+      guildId: this.options.guildId
+    })
+    this.position = null
+    this.state = PlayerState.CONNECTED
   }
 }
