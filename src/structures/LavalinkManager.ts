@@ -73,7 +73,7 @@ export interface LavalinkManagerEvents {
   /**
    * Emitted when the server sends a track end event.
    */
-  PLAYER_TRACK_END: { player: Player, track: Track, reason: string }
+  PLAYER_TRACK_END: { player: Player, track: Track | null, reason: string }
   /**
    * Emitted when the server sends a track exception event.
    */
@@ -81,11 +81,11 @@ export interface LavalinkManagerEvents {
   /**
    * Emitted when the server sends a track start event.
    */
-  PLAYER_TRACK_START: { player: Player, track: Track }
+  PLAYER_TRACK_START: { player: Player, track: Track | null }
   /**
    * Emitted when the server sends a track stuck event.
    */
-  PLAYER_TRACK_STUCK: { player: Player, track: Track, thresholdMs: number }
+  PLAYER_TRACK_STUCK: { player: Player, track: Track | null, thresholdMs: number }
 }
 
 export interface LavalinkManagerOptions {

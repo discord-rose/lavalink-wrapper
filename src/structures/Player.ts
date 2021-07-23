@@ -43,7 +43,7 @@ export interface PlayerEvents {
   /**
    * Emitted when the server sends a track end event.
    */
-  TRACK_END: { player: Player, track: Track, reason: string }
+  TRACK_END: { player: Player, track: Track | null, reason: string }
   /**
    * Emitted when the server sends a track exception event.
    */
@@ -51,11 +51,11 @@ export interface PlayerEvents {
   /**
    * Emitted when the server sends a track start event.
    */
-  TRACK_START: { player: Player, track: Track }
+  TRACK_START: { player: Player, track: Track | null }
   /**
    * Emitted when the server sends a track stuck event.
    */
-  TRACK_STUCK: { player: Player, track: Track, thresholdMs: number }
+  TRACK_STUCK: { player: Player, track: Track | null, thresholdMs: number }
 }
 
 export interface PlayerOptions {
@@ -599,9 +599,9 @@ export class Player extends EventEmitter<PlayerEvents> {
     if (payload.op === 'playerUpdate') {
       this.position = payload.state.position ?? null
     } else if (payload.op === 'event') {
-      const track = (await this.manager.decodeTracks([payload.track]))[0]
+      const track = typeof payload.track === 'string' ? (await this.manager.decodeTracks([payload.track]))[0] : null
       // @ts-expect-error Cannot assign to 'requester' because it is a read-only property.
-      track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title)
+      if (track) track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title)
       switch (payload.type) {
         case 'TrackEndEvent':
           this.position = null
