@@ -62,7 +62,7 @@ export interface PlayerEvents {
      */
     TRACK_EXCEPTION: {
         player: Player;
-        track: Track | TrackPartial | null;
+        track: Track | null;
         message: string;
         severity: string;
         cause: string;

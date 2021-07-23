@@ -494,16 +494,19 @@ class Player extends typed_emitter_1.EventEmitter {
             this.position = payload.state.position ?? null;
         }
         else if (payload.op === 'event') {
+            const track = (await this.manager.decodeTracks([payload.track]))[0];
+            // @ts-expect-error Cannot assign to 'requester' because it is a read-only property.
+            track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title);
             switch (payload.type) {
                 case 'TrackEndEvent':
                     this.position = null;
                     this.state = PlayerState.CONNECTED;
-                    this.emit('TRACK_END', { player: this, track: this.queue[this.queuePosition ?? 0], reason: payload.reason });
+                    this.emit('TRACK_END', { player: this, track, reason: payload.reason });
                     if (payload.reason !== 'STOPPED' && payload.reason !== 'REPLACED')
                         void this._advanceQueue();
                     break;
                 case 'TrackExceptionEvent':
-                    this.emit('TRACK_EXCEPTION', { player: this, track: this.queue[this.queuePosition ?? 0] ?? null, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause });
+                    this.emit('TRACK_EXCEPTION', { player: this, track, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause });
                     break;
                 case 'TrackStartEvent':
                     if (this.sentPausedPlay) {
@@ -512,11 +515,11 @@ class Player extends typed_emitter_1.EventEmitter {
                     }
                     else
                         this.state = PlayerState.PLAYING;
-                    this.emit('TRACK_START', { player: this, track: this.queue[this.queuePosition ?? 0] });
+                    this.emit('TRACK_START', { player: this, track });
                     break;
                 case 'TrackStuckEvent':
+                    this.emit('TRACK_STUCK', { player: this, track, thresholdMs: payload.thresholdMs });
                     await this._stop().catch(() => { });
-                    this.emit('TRACK_STUCK', { player: this, track: this.queue[this.queuePosition ?? 0], thresholdMs: payload.thresholdMs });
                     void this._advanceQueue();
                     break;
             }

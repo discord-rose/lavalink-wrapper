@@ -104,7 +104,7 @@ export interface LavalinkManagerEvents {
      */
     PLAYER_TRACK_EXCEPTION: {
         player: Player;
-        track: Track | TrackPartial | null;
+        track: Track | null;
         message: string;
         severity: string;
         cause: string;
