@@ -77,7 +77,7 @@ export interface LavalinkManagerEvents {
   /**
    * Emitted when the server sends a track exception event.
    */
-  PLAYER_TRACK_EXCEPTION: { player: Player, track: Track | TrackPartial | null, message: string, severity: string, cause: string }
+  PLAYER_TRACK_EXCEPTION: { player: Player, track: Track | null, message: string, severity: string, cause: string }
   /**
    * Emitted when the server sends a track start event.
    */

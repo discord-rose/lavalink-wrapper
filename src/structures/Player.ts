@@ -47,7 +47,7 @@ export interface PlayerEvents {
   /**
    * Emitted when the server sends a track exception event.
    */
-  TRACK_EXCEPTION: { player: Player, track: Track | TrackPartial | null, message: string, severity: string, cause: string }
+  TRACK_EXCEPTION: { player: Player, track: Track | null, message: string, severity: string, cause: string }
   /**
    * Emitted when the server sends a track start event.
    */
@@ -599,26 +599,29 @@ export class Player extends EventEmitter<PlayerEvents> {
     if (payload.op === 'playerUpdate') {
       this.position = payload.state.position ?? null
     } else if (payload.op === 'event') {
+      const track = (await this.manager.decodeTracks([payload.track]))[0]
+      // @ts-expect-error Cannot assign to 'requester' because it is a read-only property.
+      track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title)
       switch (payload.type) {
         case 'TrackEndEvent':
           this.position = null
           this.state = PlayerState.CONNECTED
-          this.emit('TRACK_END', { player: this, track: this.queue[this.queuePosition ?? 0] as Track, reason: payload.reason })
+          this.emit('TRACK_END', { player: this, track, reason: payload.reason })
           if (payload.reason !== 'STOPPED' && payload.reason !== 'REPLACED') void this._advanceQueue()
           break
         case 'TrackExceptionEvent':
-          this.emit('TRACK_EXCEPTION', { player: this, track: this.queue[this.queuePosition ?? 0] ?? null, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause })
+          this.emit('TRACK_EXCEPTION', { player: this, track, message: payload.exception.message, severity: payload.exception.severity, cause: payload.exception.cause })
           break
         case 'TrackStartEvent':
           if (this.sentPausedPlay) {
             this.state = PlayerState.PAUSED
             this.sentPausedPlay = null
           } else this.state = PlayerState.PLAYING
-          this.emit('TRACK_START', { player: this, track: this.queue[this.queuePosition ?? 0] as Track })
+          this.emit('TRACK_START', { player: this, track })
           break
         case 'TrackStuckEvent':
+          this.emit('TRACK_STUCK', { player: this, track, thresholdMs: payload.thresholdMs })
           await this._stop().catch(() => {})
-          this.emit('TRACK_STUCK', { player: this, track: this.queue[this.queuePosition ?? 0] as Track, thresholdMs: payload.thresholdMs })
           void this._advanceQueue()
           break
       }
