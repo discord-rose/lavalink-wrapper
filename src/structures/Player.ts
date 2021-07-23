@@ -596,6 +596,7 @@ export class Player extends EventEmitter<PlayerEvents> {
    * @param payload The received payload.
    */
   private async _handlePayload ({ node, payload }: { node: Node, payload: any }): Promise<void> {
+    if (payload.guildId !== this.options.guildId) return
     if (payload.op === 'playerUpdate') {
       this.position = payload.state.position ?? null
     } else if (payload.op === 'event') {
