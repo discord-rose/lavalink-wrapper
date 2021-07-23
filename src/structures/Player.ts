@@ -256,7 +256,7 @@ export class Player extends EventEmitter<PlayerEvents> {
         guild_id: this.options.guildId,
         channel_id: this.options.voiceChannelId,
         self_mute: this.options.selfMute,
-        self_deafen: this.options.selfDeafen
+        self_deaf: this.options.selfDeafen
       }
     })
 
