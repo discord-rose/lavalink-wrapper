@@ -282,14 +282,14 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
             }
           }
         }
-        const tracks = data.tracks.items.map((t) => new TrackPartialClass(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms))
+        const tracks = data.tracks.items.map((t) => new TrackPartialClass((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms))
         let next = data.tracks.next
         while (next) {
           const nextRes = await fetch(next, {
             method: 'GET', headers
           })
           const nextData = await nextRes.json()
-          if (nextData?.items?.length) tracks.push(...nextData.items.map((t) => new TrackPartialClass(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms)))
+          if (nextData?.items?.length) tracks.push(...nextData.items.map((t) => new TrackPartialClass((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms)))
           if (nextData?.next) next = nextData.next
           else next = null
         }
@@ -308,7 +308,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
         const data = await res.json()
         return {
           loadType: 'TRACK_LOADED',
-          tracks: [new TrackPartialClass(data.track.name, requester, data.track.artists.map((a) => a.name).join(', '), data.track.duration_ms)]
+          tracks: [new TrackPartialClass(data.name, requester, data.artists.map((a) => a.name).join(', '), data.duration_ms)]
         }
       }
     } else {
