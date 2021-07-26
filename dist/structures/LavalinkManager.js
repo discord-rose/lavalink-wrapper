@@ -162,7 +162,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
                         }
                     };
                 }
-                const tracks = data.tracks.items.map((t) => new Track_1.TrackPartial(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms));
+                const tracks = data.tracks.items.map((t) => new Track_1.TrackPartial((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms));
                 let next = data.tracks.next;
                 while (next) {
                     const nextRes = await node_fetch_1.default(next, {
@@ -170,7 +170,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
                     });
                     const nextData = await nextRes.json();
                     if (nextData?.items?.length)
-                        tracks.push(...nextData.items.map((t) => new Track_1.TrackPartial(t.track.name, requester, t.track.artists.map((a) => a.name).join(', '), t.track.duration_ms)));
+                        tracks.push(...nextData.items.map((t) => new Track_1.TrackPartial((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms)));
                     if (nextData?.next)
                         next = nextData.next;
                     else
@@ -192,7 +192,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
                 const data = await res.json();
                 return {
                     loadType: 'TRACK_LOADED',
-                    tracks: [new Track_1.TrackPartial(data.track.name, requester, data.track.artists.map((a) => a.name).join(', '), data.track.duration_ms)]
+                    tracks: [new Track_1.TrackPartial(data.name, requester, data.artists.map((a) => a.name).join(', '), data.duration_ms)]
                 };
             }
         }
