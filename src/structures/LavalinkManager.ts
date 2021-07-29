@@ -1,5 +1,5 @@
 import { Node, Player, Track, TrackPartial } from '../typings/lib'
-import { Node as NodeClass, NodeOptions, NodeState } from './Node'
+import { Node as NodeClass, NodeOptions, NodeState, RequestOptions } from './Node'
 import { Player as PlayerClass, PlayerOptions } from './Player'
 import { Track as TrackClass, TrackPartial as TrackPartialClass } from './Track'
 
@@ -112,6 +112,10 @@ export interface LavalinkManagerOptions {
     clientId: string
     clientSecret: string
   }
+  /**
+   * The default request options to use when sending requests to spotify.
+   */
+  defaultSpotifyRequestOptions?: RequestOptions
 }
 
 /**
@@ -268,16 +272,16 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
       headers.set('Content-Type', 'application/json')
 
       if (spotifyMatch[1] === 'album' || spotifyMatch[1] === 'playlist') {
-        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, {
+        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
           method: 'GET', headers
-        })
+        }))
         const data = await res.json()
         if (!data?.tracks?.items?.length) {
           return {
             loadType: 'LOAD_FAILED',
             tracks: [],
             exception: {
-              message: 'No spotify tracks found',
+              message: `No spotify tracks found: HTTP Code ${res.status}`,
               severity: 'COMMON'
             }
           }
@@ -285,9 +289,9 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
         const tracks = data.tracks.items.map((t) => new TrackPartialClass((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms))
         let next = data.tracks.next
         while (next) {
-          const nextRes = await fetch(next, {
+          const nextRes = await fetch(next, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
             method: 'GET', headers
-          })
+          }))
           const nextData = await nextRes.json()
           if (nextData?.items?.length) tracks.push(...nextData.items.map((t) => new TrackPartialClass((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms)))
           if (nextData?.next) next = nextData.next
@@ -302,9 +306,9 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
           }
         }
       } else {
-        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, {
+        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
           method: 'GET', headers
-        })
+        }))
         const data = await res.json()
         return {
           loadType: 'TRACK_LOADED',
@@ -398,11 +402,11 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     const headers = new Headers()
     headers.set('Authorization', `Basic ${Buffer.from(`${this.options.spotifyAuth.clientId}:${this.options.spotifyAuth.clientSecret}`).toString('base64')}`)
     headers.set('Content-Type', 'application/x-www-form-urlencoded')
-    const res = await fetch(Constants.SPOTIFY_TOKEN_ENDPOINT, {
+    const res = await fetch(Constants.SPOTIFY_TOKEN_ENDPOINT, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
       method: 'POST',
       headers,
       body: 'grant_type=client_credentials'
-    })
+    }))
     const data = await res.json()
     if (!data?.access_token) throw new Error('Invalid Spotify authentication')
     this.spotifyToken = `Bearer ${data.access_token as string}`
