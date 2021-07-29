@@ -1,5 +1,5 @@
 import { Node, Player, Track, TrackPartial } from '../typings/lib';
-import { NodeOptions } from './Node';
+import { NodeOptions, RequestOptions } from './Node';
 import { PlayerOptions } from './Player';
 import Collection from '@discordjs/collection';
 import { EventEmitter } from '@jpbberry/typed-emitter';
@@ -149,6 +149,10 @@ export interface LavalinkManagerOptions {
         clientId: string;
         clientSecret: string;
     };
+    /**
+     * The default request options to use when sending requests to spotify.
+     */
+    defaultSpotifyRequestOptions?: RequestOptions;
 }
 /**
  * The result from a search.

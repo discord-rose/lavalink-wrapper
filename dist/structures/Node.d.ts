@@ -1,7 +1,7 @@
 import { LavalinkManager } from '../typings/lib';
 import { NodeStats } from '../typings/Lavalink';
 import { EventEmitter } from '@jpbberry/typed-emitter';
-import { Response } from 'node-fetch';
+import { RequestRedirect, Response } from 'node-fetch';
 export interface NodeEvents {
     /**
      * Emitted when the node connects to the lavalink server.
@@ -93,6 +93,10 @@ export interface NodeOptions {
      * @default 15000
      */
     connectionTimeout?: number;
+    /**
+     * The default request options to use.
+     */
+    defaultRequestOptions?: RequestOptions;
 }
 export declare enum NodeState {
     DISCONNECTED = 0,
@@ -108,6 +112,8 @@ export interface RequestOptions {
     };
     query?: any;
     body?: any;
+    redirect?: RequestRedirect;
+    agent?: any;
     parser?: (data: any) => string;
 }
 export declare class Node extends EventEmitter<NodeEvents> {

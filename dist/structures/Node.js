@@ -101,7 +101,8 @@ class Node extends typed_emitter_1.EventEmitter {
             connectionTimeout: options.connectionTimeout ?? 15000,
             requestTimeout: options.requestTimeout ?? 15000,
             maxRetrys: options.maxRetrys ?? 10,
-            retryDelay: options.retryDelay ?? 15000
+            retryDelay: options.retryDelay ?? 15000,
+            defaultRequestOptions: options.defaultRequestOptions ?? {}
         };
         if (this.options.connectionTimeout > this.options.retryDelay)
             throw new Error('Node connection timeout must be greater than the reconnect retry delay');
@@ -202,6 +203,7 @@ class Node extends typed_emitter_1.EventEmitter {
      * @returns The response from the server.
      */
     async request(method, route, options = {}) {
+        options = Object.assign(this.options.defaultRequestOptions ?? {}, options);
         const headers = new node_fetch_1.Headers();
         headers.set('Authorization', this.options.password);
         if (options.body)
@@ -211,7 +213,7 @@ class Node extends typed_emitter_1.EventEmitter {
         return await new Promise((resolve, reject) => {
             const timedOut = setTimeout(() => reject(new Error('408 Timed out on request')), this.options.requestTimeout);
             node_fetch_1.default(`http${this.options.secure ? 's' : ''}://${this.options.host}:${this.options.port}/${route.replace(/^\//gm, '')}${options.query ? `?${new url_1.URLSearchParams(options.query).toString()}` : ''}`, {
-                method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined
+                method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined, agent: options.agent ?? null, redirect: options.redirect ?? 'follow'
             }).then(async (res) => {
                 const json = res.status === 204 ? null : await res.json();
                 if (timedOut)
