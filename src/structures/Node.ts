@@ -3,7 +3,7 @@ import { LavalinkManager } from '../typings/lib'
 import { NodeStats } from '../typings/Lavalink'
 
 import { EventEmitter } from '@jpbberry/typed-emitter'
-import fetch, { Headers, Response } from 'node-fetch'
+import fetch, { Headers, RequestRedirect, Response } from 'node-fetch'
 import { URLSearchParams } from 'url'
 import WebSocket from 'ws'
 
@@ -86,6 +86,10 @@ export interface NodeOptions {
    * @default 15000
    */
   connectionTimeout?: number
+  /**
+   * The default request options to use.
+   */
+  defaultRequestOptions?: RequestOptions
 }
 
 export enum NodeState {
@@ -104,6 +108,8 @@ export interface RequestOptions {
   }
   query?: any
   body?: any
+  redirect?: RequestRedirect
+  agent?: any
   parser?: (data: any) => string
 }
 
@@ -176,7 +182,8 @@ export class Node extends EventEmitter<NodeEvents> {
       connectionTimeout: options.connectionTimeout ?? 15000,
       requestTimeout: options.requestTimeout ?? 15000,
       maxRetrys: options.maxRetrys ?? 10,
-      retryDelay: options.retryDelay ?? 15000
+      retryDelay: options.retryDelay ?? 15000,
+      defaultRequestOptions: options.defaultRequestOptions ?? {}
     }
 
     if (this.options.connectionTimeout! > this.options.retryDelay!) throw new Error('Node connection timeout must be greater than the reconnect retry delay')
@@ -282,6 +289,7 @@ export class Node extends EventEmitter<NodeEvents> {
    * @returns The response from the server.
    */
   public async request (method: RequestMethods, route: string, options: RequestOptions = {}): Promise<{ res: Response, json: any }> {
+    options = Object.assign(this.options.defaultRequestOptions ?? {}, options)
     const headers = new Headers()
     headers.set('Authorization', this.options.password!)
     if (options.body) headers.set('Content-Type', 'application/json')
@@ -291,7 +299,7 @@ export class Node extends EventEmitter<NodeEvents> {
       const timedOut = setTimeout(() => reject(new Error('408 Timed out on request')), this.options.requestTimeout)
 
       fetch(`http${this.options.secure ? 's' : ''}://${this.options.host!}:${this.options.port!}/${route.replace(/^\//gm, '')}${options.query ? `?${new URLSearchParams(options.query).toString()}` : ''}`, {
-        method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined
+        method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined, agent: options.agent ?? null, redirect: options.redirect ?? 'follow'
       }).then(async (res) => {
         const json = res.status === 204 ? null : await res.json()
         if (timedOut) clearTimeout(timedOut)
