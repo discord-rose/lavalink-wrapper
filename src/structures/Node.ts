@@ -289,7 +289,7 @@ export class Node extends EventEmitter<NodeEvents> {
    * @returns The response from the server.
    */
   public async request (method: RequestMethods, route: string, options: RequestOptions = {}): Promise<{ res: Response, json: any }> {
-    options = Object.assign(this.options.defaultRequestOptions ?? {}, options)
+    options = Object.assign(Object.assign({}, this.options.defaultRequestOptions ?? {}), options)
     const headers = new Headers()
     headers.set('Authorization', this.options.password!)
     if (options.body) headers.set('Content-Type', 'application/json')

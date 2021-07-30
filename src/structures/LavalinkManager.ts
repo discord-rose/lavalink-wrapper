@@ -272,7 +272,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
       headers.set('Content-Type', 'application/json')
 
       if (spotifyMatch[1] === 'album' || spotifyMatch[1] === 'playlist') {
-        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
           method: 'GET', headers
         }))
         const data = await res.json()
@@ -289,7 +289,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
         const tracks = data.tracks.items.map((t) => new TrackPartialClass((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms))
         let next = data.tracks.next
         while (next) {
-          const nextRes = await fetch(next, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+          const nextRes = await fetch(next, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
             method: 'GET', headers
           }))
           const nextData = await nextRes.json()
@@ -306,7 +306,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
           }
         }
       } else {
-        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+        const res = await fetch(`${Constants.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
           method: 'GET', headers
         }))
         const data = await res.json()
@@ -402,7 +402,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     const headers = new Headers()
     headers.set('Authorization', `Basic ${Buffer.from(`${this.options.spotifyAuth.clientId}:${this.options.spotifyAuth.clientSecret}`).toString('base64')}`)
     headers.set('Content-Type', 'application/x-www-form-urlencoded')
-    const res = await fetch(Constants.SPOTIFY_TOKEN_ENDPOINT, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+    const res = await fetch(Constants.SPOTIFY_TOKEN_ENDPOINT, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
       method: 'POST',
       headers,
       body: 'grant_type=client_credentials'
