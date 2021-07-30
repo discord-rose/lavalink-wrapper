@@ -148,7 +148,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
             headers.set('Authorization', this.spotifyToken);
             headers.set('Content-Type', 'application/json');
             if (spotifyMatch[1] === 'album' || spotifyMatch[1] === 'playlist') {
-                const res = await node_fetch_1.default(`${Constants_1.default.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+                const res = await node_fetch_1.default(`${Constants_1.default.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
                     method: 'GET', headers
                 }));
                 const data = await res.json();
@@ -165,7 +165,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
                 const tracks = data.tracks.items.map((t) => new Track_1.TrackPartial((t.track ?? t).name, requester, (t.track ?? t).artists.map((a) => a.name).join(', '), (t.track ?? t).duration_ms));
                 let next = data.tracks.next;
                 while (next) {
-                    const nextRes = await node_fetch_1.default(next, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+                    const nextRes = await node_fetch_1.default(next, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
                         method: 'GET', headers
                     }));
                     const nextData = await nextRes.json();
@@ -186,7 +186,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
                 };
             }
             else {
-                const res = await node_fetch_1.default(`${Constants_1.default.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+                const res = await node_fetch_1.default(`${Constants_1.default.SPOTIFY_BASE_URL}/${spotifyMatch[1]}s/${spotifyMatch[2]}`, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
                     method: 'GET', headers
                 }));
                 const data = await res.json();
@@ -283,7 +283,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
         const headers = new node_fetch_1.Headers();
         headers.set('Authorization', `Basic ${Buffer.from(`${this.options.spotifyAuth.clientId}:${this.options.spotifyAuth.clientSecret}`).toString('base64')}`);
         headers.set('Content-Type', 'application/x-www-form-urlencoded');
-        const res = await node_fetch_1.default(Constants_1.default.SPOTIFY_TOKEN_ENDPOINT, Object.assign(this.options.defaultSpotifyRequestOptions ?? {}, {
+        const res = await node_fetch_1.default(Constants_1.default.SPOTIFY_TOKEN_ENDPOINT, Object.assign(Object.assign({}, this.options.defaultSpotifyRequestOptions ?? {}), {
             method: 'POST',
             headers,
             body: 'grant_type=client_credentials'

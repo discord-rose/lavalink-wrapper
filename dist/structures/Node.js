@@ -203,7 +203,7 @@ class Node extends typed_emitter_1.EventEmitter {
      * @returns The response from the server.
      */
     async request(method, route, options = {}) {
-        options = Object.assign(this.options.defaultRequestOptions ?? {}, options);
+        options = Object.assign(Object.assign({}, this.options.defaultRequestOptions ?? {}), options);
         const headers = new node_fetch_1.Headers();
         headers.set('Authorization', this.options.password);
         if (options.body)
