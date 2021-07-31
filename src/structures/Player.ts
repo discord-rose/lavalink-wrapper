@@ -243,6 +243,20 @@ export class Player extends EventEmitter<PlayerEvents> {
   }
 
   /**
+   * If the player is paused.
+   */
+  public get paused (): boolean {
+    return this.state === PlayerState.PAUSED
+  }
+
+  /**
+   * If the player is playing a track.
+   */
+  public get playing (): boolean {
+    return this.state === PlayerState.PLAYING
+  }
+
+  /**
    * Connect to a voice channel.
    * The player must be in a disconnected state.
    */
