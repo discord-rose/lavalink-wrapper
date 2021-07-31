@@ -350,6 +350,11 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     return (res.json as []).map((data: TrackData) => new TrackClass(data, 'N/A'))
   }
 
+  /**
+   * Resolve a track partial into a track.
+   * @param track The track partial to resolve.
+   * @returns The resolved track.
+   */
   public async resolveTrack (track: TrackPartial): Promise<Track> {
     const search = await this.search(`${track.title}${track.author ? ` - ${track.author}` : ''}`, track.requester)
     search.tracks = search.tracks.filter((t) => t instanceof TrackClass)
