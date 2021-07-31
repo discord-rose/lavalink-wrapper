@@ -227,6 +227,14 @@ export declare class Player extends EventEmitter<PlayerEvents> {
      */
     constructor(options: PlayerOptions, node: Node, manager: LavalinkManager);
     /**
+     * If the player is paused.
+     */
+    get paused(): boolean;
+    /**
+     * If the player is playing a track.
+     */
+    get playing(): boolean;
+    /**
      * Connect to a voice channel.
      * The player must be in a disconnected state.
      */

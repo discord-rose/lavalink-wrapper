@@ -112,6 +112,18 @@ class Player extends typed_emitter_1.EventEmitter {
         this.emit('CREATED', this);
     }
     /**
+     * If the player is paused.
+     */
+    get paused() {
+        return this.state === PlayerState.PAUSED;
+    }
+    /**
+     * If the player is playing a track.
+     */
+    get playing() {
+        return this.state === PlayerState.PLAYING;
+    }
+    /**
      * Connect to a voice channel.
      * The player must be in a disconnected state.
      */
