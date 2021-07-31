@@ -88,7 +88,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
      */
     async connectNodes() {
         if (this.options.spotifyAuth)
-            await this._renewSpotifyToken();
+            void this._renewSpotifyLoop();
         const connect = [];
         this.nodes.forEach((node) => connect.push(new Promise((resolve, reject) => {
             let attempts = 0;
@@ -228,6 +228,11 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
             throw new Error('No decode response data');
         return res.json.map((data) => new Track_1.Track(data, 'N/A'));
     }
+    /**
+     * Resolve a track partial into a track.
+     * @param track The track partial to resolve.
+     * @returns The resolved track.
+     */
     async resolveTrack(track) {
         const search = await this.search(`${track.title}${track.author ? ` - ${track.author}` : ''}`, track.requester);
         search.tracks = search.tracks.filter((t) => t instanceof Track_1.Track);
@@ -275,9 +280,10 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
         }
     }
     /**
-     * Renew the spotify token.
+     * Authorize with Spotify.
+     * @returns The time the token is valid for in milliseconds.
      */
-    async _renewSpotifyToken() {
+    async _authorizeSpotify() {
         if (!this.options.spotifyAuth)
             throw new Error('Spotify auth must be defined');
         const headers = new node_fetch_1.Headers();
@@ -292,14 +298,20 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
         if (!data?.access_token)
             throw new Error('Invalid Spotify authentication');
         this.spotifyToken = `Bearer ${data.access_token}`;
+        this.emit('SPOTIFY_AUTHORIZED', { expiresIn: data.expires_in * 1000, token: this.spotifyToken });
         return data.expires_in * 1000;
     }
     /**
-     * A helper function for renewing the token when it expires.
-     * @param time The time until the token expires.
+     * A helper function to loop renewing spotify tokens.
      */
-    async _renewExpiredSpotifyToken() {
-        setTimeout(this._renewExpiredSpotifyToken.bind(this), await this._renewSpotifyToken()); // eslint-disable-line @typescript-eslint/no-implied-eval
+    async _renewSpotifyLoop() {
+        setTimeout(() => void this._renewSpotifyLoop(), await new Promise((resolve, reject) => {
+            const auth = () => void this._authorizeSpotify().then((time) => resolve(time)).catch((error) => {
+                this.emit('SPOTIFY_AUTH_ERROR', error);
+                auth();
+            });
+            auth();
+        }));
     }
 }
 exports.LavalinkManager = LavalinkManager;

@@ -124,6 +124,17 @@ export interface LavalinkManagerEvents {
         track: Track | null;
         thresholdMs: number;
     };
+    /**
+     * Emitted when the lavalink manager authorizes with spotify, or renews it's spotify token.
+     */
+    SPOTIFY_AUTHORIZED: {
+        expiresIn: number;
+        token: string;
+    };
+    /**
+     * Emitted when there is an error authorizing with spotify.
+     */
+    SPOTIFY_AUTH_ERROR: Error;
 }
 export interface LavalinkManagerOptions {
     /**
@@ -203,7 +214,7 @@ export declare class LavalinkManager extends EventEmitter<LavalinkManagerEvents>
      * The manager's spotify token.
      * Set when running LavalinkManager#connectNodes().
      */
-    private spotifyToken;
+    spotifyToken: string | null;
     /**
      * Create a lavalink manager.
      * @param options The options to use for the manager.
@@ -241,6 +252,11 @@ export declare class LavalinkManager extends EventEmitter<LavalinkManagerEvents>
      * @returns An array of the decoded tracks.
      */
     decodeTracks(tracks: string[]): Promise<Track[]>;
+    /**
+     * Resolve a track partial into a track.
+     * @param track The track partial to resolve.
+     * @returns The resolved track.
+     */
     resolveTrack(track: TrackPartial): Promise<Track>;
     /**
      * Handle voice state update data.
@@ -249,12 +265,12 @@ export declare class LavalinkManager extends EventEmitter<LavalinkManagerEvents>
      */
     private _handleVoiceUpdate;
     /**
-     * Renew the spotify token.
+     * Authorize with Spotify.
+     * @returns The time the token is valid for in milliseconds.
      */
-    private _renewSpotifyToken;
+    private _authorizeSpotify;
     /**
-     * A helper function for renewing the token when it expires.
-     * @param time The time until the token expires.
+     * A helper function to loop renewing spotify tokens.
      */
-    private _renewExpiredSpotifyToken;
+    private _renewSpotifyLoop;
 }
