@@ -86,6 +86,14 @@ export interface LavalinkManagerEvents {
    * Emitted when the server sends a track stuck event.
    */
   PLAYER_TRACK_STUCK: { player: Player, track: Track | null, thresholdMs: number }
+  /**
+   * Emitted when the lavalink manager authorizes with spotify, or renews it's spotify token.
+   */
+  SPOTIFY_AUTHORIZED: { expiresIn: number, token: string }
+  /**
+   * Emitted when there is an error authorizing with spotify.
+   */
+  SPOTIFY_AUTH_ERROR: Error
 }
 
 export interface LavalinkManagerOptions {
@@ -164,12 +172,11 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
    * The manager's players.
    */
   public players: Collection<Snowflake, Player> = new Collection()
-
   /**
    * The manager's spotify token.
    * Set when running LavalinkManager#connectNodes().
    */
-  private spotifyToken: string | null = null
+  public spotifyToken: string | null = null
 
   /**
    * Create a lavalink manager.
@@ -214,7 +221,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
    * @returns The results of node connection attempts.
    */
   public async connectNodes (): Promise<Array<PromiseSettledResult<Node>>> {
-    if (this.options.spotifyAuth) await this._renewSpotifyToken()
+    if (this.options.spotifyAuth) void this._renewSpotifyLoop()
     const connect: Array<Promise<Node>> = []
     this.nodes.forEach((node) => connect.push(new Promise((resolve, reject) => {
       let attempts = 0
@@ -400,9 +407,10 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
   }
 
   /**
-   * Renew the spotify token.
+   * Authorize with Spotify.
+   * @returns The time the token is valid for in milliseconds.
    */
-  private async _renewSpotifyToken (): Promise<number> {
+  private async _authorizeSpotify (): Promise<number> {
     if (!this.options.spotifyAuth) throw new Error('Spotify auth must be defined')
     const headers = new Headers()
     headers.set('Authorization', `Basic ${Buffer.from(`${this.options.spotifyAuth.clientId}:${this.options.spotifyAuth.clientSecret}`).toString('base64')}`)
@@ -415,14 +423,20 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     const data = await res.json()
     if (!data?.access_token) throw new Error('Invalid Spotify authentication')
     this.spotifyToken = `Bearer ${data.access_token as string}`
+    this.emit('SPOTIFY_AUTHORIZED', { expiresIn: data.expires_in * 1000, token: this.spotifyToken })
     return data.expires_in * 1000
   }
 
   /**
-   * A helper function for renewing the token when it expires.
-   * @param time The time until the token expires.
+   * A helper function to loop renewing spotify tokens.
    */
-  private async _renewExpiredSpotifyToken (): Promise<void> {
-    setTimeout(this._renewExpiredSpotifyToken.bind(this), await this._renewSpotifyToken()) // eslint-disable-line @typescript-eslint/no-implied-eval
+  private async _renewSpotifyLoop (): Promise<void> {
+    setTimeout(() => void this._renewSpotifyLoop(), await new Promise((resolve, reject) => {
+      const auth: () => void = () => void this._authorizeSpotify().then((time) => resolve(time)).catch((error) => {
+        this.emit('SPOTIFY_AUTH_ERROR', error)
+        auth()
+      })
+      auth()
+    }))
   }
 }
