@@ -1,6 +1,6 @@
 {
   "name": "@discord-rose/lavalink",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A lavalink wrapper for discord-rose.",
   "main": "./dist/index.js",
   "scripts": {
@@ -29,7 +29,7 @@
     "@discordjs/collection": "^0.2.0",
     "@jpbberry/typed-emitter": "^1.0.1",
     "discord-api-types": "^0.21.0",
-    "discord-rose": "github:discord-rose/discord-rose#build",
+    "discord-rose": "^1.5.0",
     "node-fetch": "^2.6.1",
     "ws": "^8.0.0"
   },
