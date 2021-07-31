@@ -28,17 +28,18 @@
   "dependencies": {
     "@discordjs/collection": "^0.2.0",
     "@jpbberry/typed-emitter": "^1.0.1",
-    "discord-api-types": "^0.21.0-next.f0f44e6.1626784179",
+    "discord-api-types": "^0.21.0",
     "discord-rose": "github:discord-rose/discord-rose#build",
     "node-fetch": "^2.6.1",
-    "ws": "^7.5.3"
+    "ws": "^8.0.0"
   },
   "devDependencies": {
-    "@types/node": "^16.4.1",
+    "@types/node": "^16.4.8",
     "@types/node-fetch": "^2.5.12",
     "@types/ws": "^7.4.7",
-    "@typescript-eslint/eslint-plugin": "^4.28.4",
-    "eslint": "^7.31.0",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.32.0",
     "eslint-config-standard-with-typescript": "^20.0.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
@@ -46,5 +47,8 @@
     "typedoc": "^0.21.4",
     "typescript": "^4.3.5"
   },
-  "typings": "./dist/index.d.ts"
+  "typings": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=14.15.0"
+  }
 }
