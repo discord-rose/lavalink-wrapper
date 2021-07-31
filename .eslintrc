@@ -3,19 +3,8 @@
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "overrides": [
-    {
-      "files": ["./src/socket/cache/*"],
-      "rules": {
-        "@typescript-eslint/consistent-type-assertions": "off"
-      }
-    }
-  ],
   "rules": {
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/prefer-readonly": "off",
     "@typescript-eslint/strict-boolean-expressions": "off",
-    "no-async-promise-executor": "off",
     "no-void": "off"
   }
 }

@@ -7,6 +7,60 @@ import fetch, { Headers, RequestRedirect, Response } from 'node-fetch'
 import { URLSearchParams } from 'url'
 import WebSocket from 'ws'
 
+export interface CompleteNodeOptions {
+  /**
+   * The host for the node to use.
+   * @default 'localhost'
+   */
+  host: string
+  /**
+   * The port for the node to use.
+   * @default 2333
+   */
+  port: number
+  /**
+   * The password for the node to use.
+   * @default 'youshallnotpass'
+   */
+  password: string
+  /**
+   * If the connection is secure.
+   * @default false
+   */
+  secure: boolean
+  /**
+   * The client name to use.
+   * @default 'rose-lavalink'
+   */
+  clientName: string
+  /**
+   * The time to wait before timing out a request.
+   * @default 15000
+   */
+  requestTimeout: number
+  /**
+   * The maximum number of times to try to connect or reconnect. Setting this to 0 removes the limit.
+   * @default 10
+   */
+  maxRetrys: number
+  /**
+   * The time in milliseconds to wait between connection or reconnection attempts.
+   * This must be greater than the connection timeout.
+   * @default 30000
+   */
+  retryDelay: number
+  /**
+   * The amount of time to allow to connect to the lavalink server before timing out.
+   * This must be less than the connect / reconnect retry delay.
+   * @default 15000
+   */
+  connectionTimeout: number
+  /**
+   * The default request options to use.
+   */
+  defaultRequestOptions: RequestOptions
+}
+
 export interface NodeEvents {
   /**
    * Emitted when the node connects to the lavalink server.
@@ -38,59 +92,7 @@ export interface NodeEvents {
   RECONNECTING: Node
 }
 
-export interface NodeOptions {
-  /**
-   * The host for the node to use.
-   * @default 'localhost'
-   */
-  host?: string
-  /**
-   * The port for the node to use.
-   * @default 2333
-   */
-  port?: number
-  /**
-   * The password for the node to use.
-   * @default 'youshallnotpass'
-   */
-  password?: string
-  /**
-   * If the connection is secure.
-   * @default false
-   */
-  secure?: boolean
-  /**
-   * The client name to use.
-   * @default 'rose-lavalink'
-   */
-  clientName?: string
-  /**
-   * The time to wait before timing out a request.
-   * @default 15000
-   */
-  requestTimeout?: number
-  /**
-   * The maximum number of times to try to connect or reconnect. Setting this to 0 removes the limit.
-   * @default 10
-   */
-  maxRetrys?: number
-  /**
-   * The time in milliseconds to wait between connection or reconnection attempts.
-   * This must be greater than the connection timeout.
-   * @default 30000
-   */
-  retryDelay?: number
-  /**
-   * The amount of time to allow to connect to the lavalink server before timing out.
-   * This must be less than the connect / reconnect retry delay.
-   * @default 15000
-   */
-  connectionTimeout?: number
-  /**
-   * The default request options to use.
-   */
-  defaultRequestOptions?: RequestOptions
-}
+export interface NodeOptions extends Partial<CompleteNodeOptions> {}
 
 export enum NodeState {
   DISCONNECTED,
@@ -117,7 +119,7 @@ export class Node extends EventEmitter<NodeEvents> {
   /**
    * The node's options.
    */
-  public readonly options: NodeOptions
+  public readonly options: CompleteNodeOptions
   /**
    * The node's state.
    */
@@ -186,7 +188,7 @@ export class Node extends EventEmitter<NodeEvents> {
       defaultRequestOptions: options.defaultRequestOptions ?? {}
     }
 
-    if (this.options.connectionTimeout! > this.options.retryDelay!) throw new Error('Node connection timeout must be greater than the reconnect retry delay')
+    if (this.options.connectionTimeout > this.options.retryDelay) throw new Error('Node connection timeout must be greater than the reconnect retry delay')
 
     this.on('CONNECTED', (data) => this.manager.emit('NODE_CONNECTED', data))
     this.on('CREATED', (data) => this.manager.emit('NODE_CREATED', data))
@@ -218,7 +220,8 @@ export class Node extends EventEmitter<NodeEvents> {
         reject(error)
       }, this.options.connectionTimeout)
 
-      this.ws = new WebSocket(`ws${this.options.secure ? 's' : ''}://${this.options.host!}:${this.options.port!}/`, { headers })
+      /* eslint-disable @typescript-eslint/no-non-null-assertion */
+      this.ws = new WebSocket(`ws${this.options.secure ? 's' : ''}://${this.options.host}:${this.options.port}/`, { headers })
       if (this.state !== NodeState.RECONNECTING) this.state = NodeState.CONNECTING
       this.ws.once('error', (error) => {
         this.ws!.removeAllListeners()
@@ -238,6 +241,7 @@ export class Node extends EventEmitter<NodeEvents> {
         if (timedOut) clearTimeout(timedOut)
         resolve(undefined)
       })
+      /* eslint-enable @typescript-eslint/no-non-null-assertion */
     })
   }
 
@@ -291,14 +295,14 @@ export class Node extends EventEmitter<NodeEvents> {
   public async request (method: RequestMethods, route: string, options: RequestOptions = {}): Promise<{ res: Response, json: any }> {
     options = Object.assign(Object.assign({}, this.options.defaultRequestOptions ?? {}), options)
     const headers = new Headers()
-    headers.set('Authorization', this.options.password!)
+    headers.set('Authorization', this.options.password)
     if (options.body) headers.set('Content-Type', 'application/json')
     if (options.headers) Object.keys(options.headers).forEach((key) => headers.set(key, options.headers?.[key] as string))
 
     return await new Promise((resolve, reject) => {
       const timedOut = setTimeout(() => reject(new Error('408 Timed out on request')), this.options.requestTimeout)
 
-      fetch(`http${this.options.secure ? 's' : ''}://${this.options.host!}:${this.options.port!}/${route.replace(/^\//gm, '')}${options.query ? `?${new URLSearchParams(options.query).toString()}` : ''}`, {
+      fetch(`http${this.options.secure ? 's' : ''}://${this.options.host}:${this.options.port}/${route.replace(/^\//gm, '')}${options.query ? `?${new URLSearchParams(options.query).toString()}` : ''}`, {
         method, headers, body: options.body ? (options.parser ?? JSON.stringify)(options.body) : undefined, agent: options.agent ?? null, redirect: options.redirect ?? 'follow'
       }).then(async (res) => {
         const json = res.status === 204 ? null : await res.json()
@@ -317,7 +321,7 @@ export class Node extends EventEmitter<NodeEvents> {
   private reconnect (): void {
     this.state = NodeState.RECONNECTING
     this.reconnectTimeout = setInterval(() => {
-      if (this.options.maxRetrys !== 0 && this.reconnectAttempts >= this.options.maxRetrys!) {
+      if (this.options.maxRetrys !== 0 && this.reconnectAttempts >= this.options.maxRetrys) {
         this.emit('ERROR', { node: this, error: new Error(`Unable to reconnect after ${this.reconnectAttempts} attempts.`) })
         return this.destroy()
       }

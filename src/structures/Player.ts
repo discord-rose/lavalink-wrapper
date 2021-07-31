@@ -8,6 +8,55 @@ import Collection from '@discordjs/collection'
 import { EventEmitter } from '@jpbberry/typed-emitter'
 import { PermissionsUtils, Snowflake } from 'discord-rose'
 
+export interface CompletePlayerOptions {
+  /**
+   * The guild ID to bind the player to.
+   */
+  guildId: Snowflake
+  /**
+   * The text channel ID to bind the player to.
+   */
+  textChannelId: Snowflake
+  /**
+   * The voice channel ID to bind the player to.
+   */
+  voiceChannelId: Snowflake
+  /**
+   * If the bot should self mute.
+   * @default false
+   */
+  selfMute: boolean
+  /**
+   * If the bot should self deafen.
+   * @default true
+   */
+  selfDeafen: boolean
+  /**
+   * The amount of time to allow to connect to a VC before timing out.
+   * @default 15000
+   */
+  connectionTimeout: number
+  /**
+   * If the bot should request to or become a speaker in stage channels depending on it's permissions.
+   * @default true
+   */
+  becomeSpeaker: boolean
+  /**
+   * Behavior to use when the bot is moved from the VC (This includes the bot being disconnected).
+   * 'destroy' will destroy the player.
+   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is reconnected to the VC.
+   * @default 'destroy'
+   */
+  moveBehavior: 'destroy' | 'pause'
+  /**
+   * Behavior to use when the bot is moved to the audience in a stage channel. This has no effect if becomeSpeaker is false.
+   * 'destroy' will destroy the player.
+   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is a speaker again. The bot will also request to speak, or become a speaker if it cannot request.
+   * @default 'pause'
+   */
+  stageMoveBehavior: 'destroy' | 'pause'
+}
+
 export type LoopType = 'off' | 'single' | 'queue'
 
 export interface PlayerEvents {
@@ -58,7 +107,7 @@ export interface PlayerEvents {
   TRACK_STUCK: { player: Player, track: Track | null, thresholdMs: number }
 }
 
-export interface PlayerOptions {
+export interface PlayerOptions extends Partial<CompletePlayerOptions> {
   /**
    * The guild ID to bind the player to.
    */
@@ -71,40 +120,6 @@ export interface PlayerOptions {
    * The voice channel ID to bind the player to.
    */
   voiceChannelId: Snowflake
-  /**
-   * If the bot should self mute.
-   * @default false
-   */
-  selfMute?: boolean
-  /**
-   * If the bot should self deafen.
-   * @default true
-   */
-  selfDeafen?: boolean
-  /**
-   * The amount of time to allow to connect to a VC before timing out.
-   * @default 15000
-   */
-  connectionTimeout?: number
-  /**
-   * If the bot should request to or become a speaker in stage channels depending on it's permissions.
-   * @default true
-   */
-  becomeSpeaker?: boolean
-  /**
-   * Behavior to use when the bot is moved from the VC (This includes the bot being disconnected).
-   * 'destroy' will destroy the player.
-   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is reconnected to the VC.
-   * @default 'destroy'
-   */
-  moveBehavior?: 'destroy' | 'pause'
-  /**
-   * Behavior to use when the bot is moved to the audience in a stage channel. This has no effect if becomeSpeaker is false.
-   * 'destroy' will destroy the player.
-   * 'pause' will send a pause payload to the lavalink server, and will resume when the bot is a speaker again. The bot will also request to speak, or become a speaker if it cannot request.
-   * @default 'pause'
-   */
-  stageMoveBehavior?: 'destroy' | 'pause'
 }
 
 export enum PlayerState {
@@ -165,7 +180,7 @@ export class Player extends EventEmitter<PlayerEvents> {
   /**
    * The player's options.
    */
-  public readonly options: PlayerOptions
+  public readonly options: CompletePlayerOptions
   /**
    * The position in the track playing, in milliseconds.
    * This is null if no track is playing.

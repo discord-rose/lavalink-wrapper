@@ -12,6 +12,36 @@ import { EventEmitter } from '@jpbberry/typed-emitter'
 import fetch, { Headers } from 'node-fetch'
 import { Snowflake, Worker } from 'discord-rose'
 
+export interface CompleteLavalinkManagerOptions {
+  /**
+   * An array of nodes to connect to.
+   */
+  nodeOptions: NodeOptions[]
+  /**
+   * An array of enabled sources.
+   * If spotify is specified, the spotifyAuth option should also be defined.
+   * @default ['youtube', 'soundcloud']
+   */
+  enabledSources: Source[]
+  /**
+   * The default source to use for searches.
+   * @default 'youtube'
+   */
+  defaultSource: Source
+  /**
+   * Authentication for the spotify API.
+   * This will enable resolving spotify links into youtube tracks.
+   */
+  spotifyAuth?: {
+    clientId: string
+    clientSecret: string
+  }
+  /**
+   * The default request options to use when sending requests to spotify.
+   */
+  defaultSpotifyRequestOptions?: RequestOptions
+}
+
 export interface LavalinkManagerEvents {
   /**
    * Emitted when a node connects to it's lavalink server.
@@ -96,34 +126,11 @@ export interface LavalinkManagerEvents {
   SPOTIFY_AUTH_ERROR: Error
 }
 
-export interface LavalinkManagerOptions {
+export interface LavalinkManagerOptions extends Partial<CompleteLavalinkManagerOptions> {
   /**
    * An array of nodes to connect to.
    */
   nodeOptions: NodeOptions[]
-  /**
-   * An array of enabled sources.
-   * If spotify is specified, the spotifyAuth option should also be defined.
-   * @default ['youtube', 'soundcloud']
-   */
-  enabledSources?: Source[]
-  /**
-   * The default source to use for searches.
-   * @default 'youtube'
-   */
-  defaultSource?: Source
-  /**
-   * Authentication for the spotify API.
-   * This will enable resolving spotify links into youtube tracks.
-   */
-  spotifyAuth?: {
-    clientId: string
-    clientSecret: string
-  }
-  /**
-   * The default request options to use when sending requests to spotify.
-   */
-  defaultSpotifyRequestOptions?: RequestOptions
 }
 
 /**
@@ -167,7 +174,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
   /**
    * The manager's options.
    */
-  public readonly options: LavalinkManagerOptions
+  public readonly options: CompleteLavalinkManagerOptions
   /**
    * The manager's players.
    */
@@ -226,7 +233,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     this.nodes.forEach((node) => connect.push(new Promise((resolve, reject) => {
       let attempts = 0
       const tryConnect: () => void = async () => {
-        if (node.options.maxRetrys !== 0 && attempts >= node.options.maxRetrys!) {
+        if (node.options.maxRetrys !== 0 && attempts >= node.options.maxRetrys) {
           node.emit('ERROR', { node, error: new Error(`Unable to connect after ${attempts} attempts`) })
           if (connectInterval) clearInterval(connectInterval)
           reject(new Error('Max connect retrys reached'))
@@ -266,7 +273,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
    * @param source The source to use if the query is not a link, or if the link is from spotify. Defaults to the manager's default source.
    * @returns The search result.
    */
-  public async search (query: string, requester: string, source: Source = this.options.defaultSource!): Promise<SearchResult> {
+  public async search (query: string, requester: string, source: Source = this.options.defaultSource): Promise<SearchResult> {
     const searchNode = this.leastLoadNodes[0]
     if (!searchNode) throw new Error('No available nodes to perform a search')
 
