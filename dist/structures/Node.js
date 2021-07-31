@@ -132,6 +132,7 @@ class Node extends typed_emitter_1.EventEmitter {
                 this.emit('ERROR', { node: this, error });
                 reject(error);
             }, this.options.connectionTimeout);
+            /* eslint-disable @typescript-eslint/no-non-null-assertion */
             this.ws = new ws_1.default(`ws${this.options.secure ? 's' : ''}://${this.options.host}:${this.options.port}/`, { headers });
             if (this.state !== NodeState.RECONNECTING)
                 this.state = NodeState.CONNECTING;
@@ -156,6 +157,7 @@ class Node extends typed_emitter_1.EventEmitter {
                     clearTimeout(timedOut);
                 resolve(undefined);
             });
+            /* eslint-enable @typescript-eslint/no-non-null-assertion */
         });
     }
     /**

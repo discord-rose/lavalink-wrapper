@@ -2,6 +2,59 @@ import { LavalinkManager } from '../typings/lib';
 import { NodeStats } from '../typings/Lavalink';
 import { EventEmitter } from '@jpbberry/typed-emitter';
 import { RequestRedirect, Response } from 'node-fetch';
+export interface CompleteNodeOptions {
+    /**
+     * The host for the node to use.
+     * @default 'localhost'
+     */
+    host: string;
+    /**
+     * The port for the node to use.
+     * @default 2333
+     */
+    port: number;
+    /**
+     * The password for the node to use.
+     * @default 'youshallnotpass'
+     */
+    password: string;
+    /**
+     * If the connection is secure.
+     * @default false
+     */
+    secure: boolean;
+    /**
+     * The client name to use.
+     * @default 'rose-lavalink'
+     */
+    clientName: string;
+    /**
+     * The time to wait before timing out a request.
+     * @default 15000
+     */
+    requestTimeout: number;
+    /**
+     * The maximum number of times to try to connect or reconnect. Setting this to 0 removes the limit.
+     * @default 10
+     */
+    maxRetrys: number;
+    /**
+     * The time in milliseconds to wait between connection or reconnection attempts.
+     * This must be greater than the connection timeout.
+     * @default 30000
+     */
+    retryDelay: number;
+    /**
+     * The amount of time to allow to connect to the lavalink server before timing out.
+     * This must be less than the connect / reconnect retry delay.
+     * @default 15000
+     */
+    connectionTimeout: number;
+    /**
+     * The default request options to use.
+     */
+    defaultRequestOptions: RequestOptions;
+}
 export interface NodeEvents {
     /**
      * Emitted when the node connects to the lavalink server.
@@ -45,58 +98,7 @@ export interface NodeEvents {
      */
     RECONNECTING: Node;
 }
-export interface NodeOptions {
-    /**
-     * The host for the node to use.
-     * @default 'localhost'
-     */
-    host?: string;
-    /**
-     * The port for the node to use.
-     * @default 2333
-     */
-    port?: number;
-    /**
-     * The password for the node to use.
-     * @default 'youshallnotpass'
-     */
-    password?: string;
-    /**
-     * If the connection is secure.
-     * @default false
-     */
-    secure?: boolean;
-    /**
-     * The client name to use.
-     * @default 'rose-lavalink'
-     */
-    clientName?: string;
-    /**
-     * The time to wait before timing out a request.
-     * @default 15000
-     */
-    requestTimeout?: number;
-    /**
-     * The maximum number of times to try to connect or reconnect. Setting this to 0 removes the limit.
-     * @default 10
-     */
-    maxRetrys?: number;
-    /**
-     * The time in milliseconds to wait between connection or reconnection attempts.
-     * This must be greater than the connection timeout.
-     * @default 30000
-     */
-    retryDelay?: number;
-    /**
-     * The amount of time to allow to connect to the lavalink server before timing out.
-     * This must be less than the connect / reconnect retry delay.
-     * @default 15000
-     */
-    connectionTimeout?: number;
-    /**
-     * The default request options to use.
-     */
-    defaultRequestOptions?: RequestOptions;
+export interface NodeOptions extends Partial<CompleteNodeOptions> {
 }
 export declare enum NodeState {
     DISCONNECTED = 0,
@@ -122,7 +124,7 @@ export declare class Node extends EventEmitter<NodeEvents> {
     /**
      * The node's options.
      */
-    readonly options: NodeOptions;
+    readonly options: CompleteNodeOptions;
     /**
      * The node's state.
      */

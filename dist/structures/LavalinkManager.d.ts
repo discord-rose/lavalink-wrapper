@@ -4,6 +4,35 @@ import { PlayerOptions } from './Player';
 import Collection from '@discordjs/collection';
 import { EventEmitter } from '@jpbberry/typed-emitter';
 import { Snowflake, Worker } from 'discord-rose';
+export interface CompleteLavalinkManagerOptions {
+    /**
+     * An array of nodes to connect to.
+     */
+    nodeOptions: NodeOptions[];
+    /**
+     * An array of enabled sources.
+     * If spotify is specified, the spotifyAuth option should also be defined.
+     * @default ['youtube', 'soundcloud']
+     */
+    enabledSources: Source[];
+    /**
+     * The default source to use for searches.
+     * @default 'youtube'
+     */
+    defaultSource: Source;
+    /**
+     * Authentication for the spotify API.
+     * This will enable resolving spotify links into youtube tracks.
+     */
+    spotifyAuth?: {
+        clientId: string;
+        clientSecret: string;
+    };
+    /**
+     * The default request options to use when sending requests to spotify.
+     */
+    defaultSpotifyRequestOptions?: RequestOptions;
+}
 export interface LavalinkManagerEvents {
     /**
      * Emitted when a node connects to it's lavalink server.
@@ -136,34 +165,11 @@ export interface LavalinkManagerEvents {
      */
     SPOTIFY_AUTH_ERROR: Error;
 }
-export interface LavalinkManagerOptions {
+export interface LavalinkManagerOptions extends Partial<CompleteLavalinkManagerOptions> {
     /**
      * An array of nodes to connect to.
      */
     nodeOptions: NodeOptions[];
-    /**
-     * An array of enabled sources.
-     * If spotify is specified, the spotifyAuth option should also be defined.
-     * @default ['youtube', 'soundcloud']
-     */
-    enabledSources?: Source[];
-    /**
-     * The default source to use for searches.
-     * @default 'youtube'
-     */
-    defaultSource?: Source;
-    /**
-     * Authentication for the spotify API.
-     * This will enable resolving spotify links into youtube tracks.
-     */
-    spotifyAuth?: {
-        clientId: string;
-        clientSecret: string;
-    };
-    /**
-     * The default request options to use when sending requests to spotify.
-     */
-    defaultSpotifyRequestOptions?: RequestOptions;
 }
 /**
  * The result from a search.
@@ -205,7 +211,7 @@ export declare class LavalinkManager extends EventEmitter<LavalinkManagerEvents>
     /**
      * The manager's options.
      */
-    readonly options: LavalinkManagerOptions;
+    readonly options: CompleteLavalinkManagerOptions;
     /**
      * The manager's players.
      */
