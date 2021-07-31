@@ -1,7 +1,10 @@
-src/
+docs/
 node_modules/
-.vscode/
+src/
 test/
+.vscode/
 tsconfig.json
+typedoc.json
+.eslintrc
 .gitignore
 .github
