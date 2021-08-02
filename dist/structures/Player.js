@@ -124,6 +124,12 @@ class Player extends typed_emitter_1.EventEmitter {
         return this.state === PlayerState.PLAYING;
     }
     /**
+     * The current track playing.
+     */
+    get currentTrack() {
+        return this.queuePosition !== null ? this.queue[this.queuePosition] : null;
+    }
+    /**
      * Connect to a voice channel.
      * The player must be in a disconnected state.
      */
@@ -385,20 +391,20 @@ class Player extends typed_emitter_1.EventEmitter {
         else {
             if (this.loop !== 'single')
                 this.queuePosition++;
-            if (!this.queue[this.queuePosition] && this.loop === 'queue')
+            if (!this.currentTrack && this.loop === 'queue')
                 this.queuePosition = 0;
         }
-        if (this.queue[this.queuePosition]) {
-            if (this.queue[this.queuePosition] instanceof Track_1.TrackPartial)
-                this.queue[this.queuePosition] = await this.manager.resolveTrack(this.queue[this.queuePosition]);
-            if (!(this.queue[this.queuePosition] instanceof Track_1.Track) || !this.queue[this.queuePosition].track) {
+        if (this.currentTrack) {
+            if (this.currentTrack instanceof Track_1.TrackPartial)
+                this.queue[this.queuePosition] = await this.manager.resolveTrack(this.currentTrack);
+            if (!(this.currentTrack instanceof Track_1.Track) || !(this.currentTrack).track) {
                 this.emit('ERROR', { player: this, error: new Error('Unable to get Track from new queue position while advancing the queue') });
                 if (this.loop === 'single')
                     this.queuePosition++;
                 await this._advanceQueue();
                 return;
             }
-            this._play(this.queue[this.queuePosition]).catch(async (error) => {
+            this._play(this.currentTrack).catch(async (error) => {
                 this.emit('ERROR', { player: this, error });
                 if (this.loop === 'single')
                     this.queuePosition++;
@@ -511,7 +517,7 @@ class Player extends typed_emitter_1.EventEmitter {
             const track = typeof payload.track === 'string' ? (await this.manager.decodeTracks([payload.track]))[0] : null;
             // @ts-expect-error Cannot assign to 'requester' because it is a read-only property.
             if (track)
-                track.requester = this.queue[this.queuePosition] && this.queue[this.queuePosition].title === track.title ? this.queue[this.queuePosition].requester : this.queue.find((v) => v.title === track.title);
+                track.requester = this.currentTrack?.title === track.title ? this.currentTrack.requester : this.queue.find((v) => v.title === track.title);
             switch (payload.type) {
                 case 'TrackEndEvent':
                     this.position = null;

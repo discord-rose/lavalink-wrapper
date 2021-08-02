@@ -249,6 +249,10 @@ export declare class Player extends EventEmitter<PlayerEvents> {
      */
     get playing(): boolean;
     /**
+     * The current track playing.
+     */
+    get currentTrack(): Track | TrackPartial | null;
+    /**
      * Connect to a voice channel.
      * The player must be in a disconnected state.
      */
