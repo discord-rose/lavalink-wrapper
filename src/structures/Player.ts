@@ -477,6 +477,15 @@ export class Player extends EventEmitter<PlayerEvents> {
   }
 
   /**
+   * Clear the queue.
+   * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved.
+   */
+  public async clear (stop: boolean): Promise<void> {
+    if (stop) await this.stop()
+    this.queue = this.currentTrack ? [this.currentTrack] : []
+  }
+
+  /**
    * Set the queue's loop behavior.
    * @param type The loop type to use.
    */
