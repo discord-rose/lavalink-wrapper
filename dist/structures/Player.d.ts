@@ -297,6 +297,11 @@ export declare class Player extends EventEmitter<PlayerEvents> {
      */
     stop(): Promise<void>;
     /**
+     * Clear the queue.
+     * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved.
+     */
+    clear(stop: boolean): Promise<void>;
+    /**
      * Set the queue's loop behavior.
      * @param type The loop type to use.
      */

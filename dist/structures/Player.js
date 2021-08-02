@@ -342,6 +342,15 @@ class Player extends typed_emitter_1.EventEmitter {
         this.queuePosition = null;
     }
     /**
+     * Clear the queue.
+     * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved.
+     */
+    async clear(stop) {
+        if (stop)
+            await this.stop();
+        this.queue = this.currentTrack ? [this.currentTrack] : [];
+    }
+    /**
      * Set the queue's loop behavior.
      * @param type The loop type to use.
      */
