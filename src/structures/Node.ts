@@ -34,6 +34,27 @@ export interface CompleteNodeOptions {
    */
   clientName: string
   /**
+   * A resume key to use when starting the node.
+   * @see [Lavalink Docs](https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#resuming-lavalink-sessions)
+   */
+  resumeKey?: string
+  /**
+   * Data to configure resuming with.
+   * If undefined resuming will not be configured.
+   * @default undefined
+   * @see [Lavalink Docs](https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#resuming-lavalink-sessions)
+   */
+  resumeKeyConfig?: {
+    /**
+     * The resume key.
+     */
+    key: string
+    /**
+     * The time in milliseconds after the wrapper disconnects that the lavalink server's session should be closed anyways.
+     */
+    timeout: number
+  }
+  /**
    * The time to wait before timing out a request.
    * @default 15000
    */
@@ -180,6 +201,8 @@ export class Node extends EventEmitter<NodeEvents> {
       port: options.port ?? 2333,
       password: options.password ?? 'youshallnotpass',
       secure: options.secure ?? false,
+      resumeKey: options.resumeKey,
+      resumeKeyConfig: options.resumeKeyConfig,
       clientName: options.clientName ?? 'rose-lavalink',
       connectionTimeout: options.connectionTimeout ?? 15000,
       requestTimeout: options.requestTimeout ?? 15000,
@@ -212,6 +235,7 @@ export class Node extends EventEmitter<NodeEvents> {
       'User-Id': this.manager.worker.user.id,
       'Client-Name': this.options.clientName
     }
+    if (this.options.resumeKey) headers['Resume-Key'] = this.options.resumeKey
 
     return await new Promise((resolve, reject) => {
       const timedOut = setTimeout(() => {
@@ -231,7 +255,7 @@ export class Node extends EventEmitter<NodeEvents> {
         if (timedOut) clearTimeout(timedOut)
         reject(error)
       })
-      this.ws.once('open', () => {
+      this.ws.once('open', async () => { // eslint-disable-line @typescript-eslint/no-misused-promises
         this.ws!.removeAllListeners()
         this._onOpen()
         this.ws!.on('open', this._onOpen.bind(this))
@@ -239,6 +263,13 @@ export class Node extends EventEmitter<NodeEvents> {
         this.ws!.on('error', this._onError.bind(this))
         this.ws!.on('message', this._onMessage.bind(this))
         if (timedOut) clearTimeout(timedOut)
+        if (this.options.resumeKeyConfig) {
+          await this.send({
+            op: 'configureResuming',
+            key: this.options.resumeKeyConfig.key,
+            timeout: Math.round(this.options.resumeKeyConfig.timeout / 1000)
+          }).catch((error) => reject(error))
+        }
         resolve(undefined)
       })
       /* eslint-enable @typescript-eslint/no-non-null-assertion */
