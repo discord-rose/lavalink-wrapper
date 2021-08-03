@@ -21,6 +21,11 @@ export interface CompleteLavalinkManagerOptions {
      */
     defaultSource: Source;
     /**
+     * The type of CPU load to sort by when getting the least load node.
+     * @default 'system'
+     */
+    leastLoadSort: 'system' | 'lavalink';
+    /**
      * Authentication for the spotify API.
      * This will enable resolving spotify links into youtube tracks.
      */

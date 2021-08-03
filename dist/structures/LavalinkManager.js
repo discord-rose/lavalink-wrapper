@@ -67,6 +67,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
         this.options = {
             nodeOptions: options.nodeOptions,
             enabledSources: options.enabledSources ?? ['youtube', 'soundcloud'],
+            leastLoadSort: options.leastLoadSort ?? 'system',
             defaultSource: options.defaultSource ?? 'youtube',
             spotifyAuth: options.spotifyAuth
         };
@@ -80,7 +81,7 @@ class LavalinkManager extends typed_emitter_1.EventEmitter {
         return this.nodes
             .reduce((p, v) => p.concat(v), [])
             .filter((node) => node.state === Node_1.NodeState.CONNECTED)
-            .sort((a, b) => (a.stats.cpu ? a.stats.cpu.systemLoad / a.stats.cpu.cores : 0) - (b.stats.cpu ? b.stats.cpu.systemLoad / b.stats.cpu.cores : 0));
+            .sort((a, b) => (a.stats.cpu ? a.stats.cpu[this.options.leastLoadSort === 'system' ? 'systemLoad' : 'lavalinkLoad'] / a.stats.cpu.cores : 0) - (b.stats.cpu ? b.stats.cpu[this.options.leastLoadSort === 'system' ? 'systemLoad' : 'lavalinkLoad'] / b.stats.cpu.cores : 0));
     }
     /**
      * Connect all nodes to their server.
