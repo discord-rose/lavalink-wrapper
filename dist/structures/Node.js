@@ -97,6 +97,8 @@ class Node extends typed_emitter_1.EventEmitter {
             port: options.port ?? 2333,
             password: options.password ?? 'youshallnotpass',
             secure: options.secure ?? false,
+            resumeKey: options.resumeKey,
+            resumeKeyConfig: options.resumeKeyConfig,
             clientName: options.clientName ?? 'rose-lavalink',
             connectionTimeout: options.connectionTimeout ?? 15000,
             requestTimeout: options.requestTimeout ?? 15000,
@@ -126,6 +128,8 @@ class Node extends typed_emitter_1.EventEmitter {
             'User-Id': this.manager.worker.user.id,
             'Client-Name': this.options.clientName
         };
+        if (this.options.resumeKey)
+            headers['Resume-Key'] = this.options.resumeKey;
         return await new Promise((resolve, reject) => {
             const timedOut = setTimeout(() => {
                 const error = new Error('Timed out while connecting to the lavalink server');
@@ -146,7 +150,7 @@ class Node extends typed_emitter_1.EventEmitter {
                     clearTimeout(timedOut);
                 reject(error);
             });
-            this.ws.once('open', () => {
+            this.ws.once('open', async () => {
                 this.ws.removeAllListeners();
                 this._onOpen();
                 this.ws.on('open', this._onOpen.bind(this));
@@ -155,6 +159,13 @@ class Node extends typed_emitter_1.EventEmitter {
                 this.ws.on('message', this._onMessage.bind(this));
                 if (timedOut)
                     clearTimeout(timedOut);
+                if (this.options.resumeKeyConfig) {
+                    await this.send({
+                        op: 'configureResuming',
+                        key: this.options.resumeKeyConfig.key,
+                        timeout: Math.round(this.options.resumeKeyConfig.timeout / 1000)
+                    }).catch((error) => reject(error));
+                }
                 resolve(undefined);
             });
             /* eslint-enable @typescript-eslint/no-non-null-assertion */

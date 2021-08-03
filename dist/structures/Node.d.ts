@@ -29,6 +29,27 @@ export interface CompleteNodeOptions {
      */
     clientName: string;
     /**
+     * A resume key to use when starting the node.
+     * @see [Lavalink Docs](https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#resuming-lavalink-sessions)
+     */
+    resumeKey?: string;
+    /**
+     * Data to configure resuming with.
+     * If undefined resuming will not be configured.
+     * @default undefined
+     * @see [Lavalink Docs](https://github.com/freyacodes/Lavalink/blob/dev/IMPLEMENTATION.md#resuming-lavalink-sessions)
+     */
+    resumeKeyConfig?: {
+        /**
+         * The resume key.
+         */
+        key: string;
+        /**
+         * The time in milliseconds after the wrapper disconnects that the lavalink server's session should be closed anyways.
+         */
+        timeout: number;
+    };
+    /**
      * The time to wait before timing out a request.
      * @default 15000
      */
