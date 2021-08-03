@@ -2736,6 +2736,9 @@ img {
 					<a href="CompleteLavalinkManagerOptions.html#enabledSources" class="tsd-kind-icon">enabled<wbr>Sources</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
+					<a href="CompleteLavalinkManagerOptions.html#leastLoadSort" class="tsd-kind-icon">least<wbr>Load<wbr>Sort</a>
+				</li>
+				<li class=" tsd-kind-property tsd-parent-kind-interface">
 					<a href="CompleteLavalinkManagerOptions.html#nodeOptions" class="tsd-kind-icon">node<wbr>Options</a>
 				</li>
 				<li class=" tsd-kind-property tsd-parent-kind-interface">
@@ -2819,6 +2822,7 @@ img {
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#defaultSource" class="tsd-kind-icon">default<wbr>Source</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#defaultSpotifyRequestOptions" class="tsd-kind-icon">default<wbr>Spotify<wbr>Request<wbr>Options</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#enabledSources" class="tsd-kind-icon">enabled<wbr>Sources</a></li>
+							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#leastLoadSort" class="tsd-kind-icon">least<wbr>Load<wbr>Sort</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#nodeOptions" class="tsd-kind-icon">node<wbr>Options</a></li>
 							<li class="tsd-kind-property tsd-parent-kind-interface"><a href="CompleteLavalinkManagerOptions.html#spotifyAuth" class="tsd-kind-icon">spotify<wbr>Auth</a></li>
 						</ul>
@@ -2834,7 +2838,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">default<wbr>Source<span class="tsd-signature-symbol">:</span> <a href="../modules.html#Source" class="tsd-signature-type" data-tsd-kind="Type alias">Source</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/f16f15b/src/structures/LavalinkManager.ts#L30">structures/LavalinkManager.ts:30</a></li>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L30">structures/LavalinkManager.ts:30</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -2854,7 +2858,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">default<wbr>Spotify<wbr>Request<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="RequestOptions.html" class="tsd-signature-type" data-tsd-kind="Interface">RequestOptions</a></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/f16f15b/src/structures/LavalinkManager.ts#L42">structures/LavalinkManager.ts:42</a></li>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L47">structures/LavalinkManager.ts:47</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -2869,7 +2873,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">enabled<wbr>Sources<span class="tsd-signature-symbol">:</span> <a href="../modules.html#Source" class="tsd-signature-type" data-tsd-kind="Type alias">Source</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/f16f15b/src/structures/LavalinkManager.ts#L25">structures/LavalinkManager.ts:25</a></li>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L25">structures/LavalinkManager.ts:25</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -2885,12 +2889,32 @@ img {
 				</div>
 			</section>
 			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+				<a name="leastLoadSort" class="tsd-anchor"></a>
+				<h3>least<wbr>Load<wbr>Sort</h3>
+				<div class="tsd-signature tsd-kind-icon">least<wbr>Load<wbr>Sort<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;system&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;lavalink&quot;</span></div>
+				<aside class="tsd-sources">
+					<ul>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L35">structures/LavalinkManager.ts:35</a></li>
+					</ul>
+				</aside>
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>The type of CPU load to sort by when getting the least load node.</p>
+					</div>
+					<dl class="tsd-comment-tags">
+						<dt>default</dt>
+						<dd><p>&#39;system&#39;</p>
+						</dd>
+					</dl>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 				<a name="nodeOptions" class="tsd-anchor"></a>
 				<h3>node<wbr>Options</h3>
 				<div class="tsd-signature tsd-kind-icon">node<wbr>Options<span class="tsd-signature-symbol">:</span> <a href="NodeOptions.html" class="tsd-signature-type" data-tsd-kind="Interface">NodeOptions</a><span class="tsd-signature-symbol">[]</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/f16f15b/src/structures/LavalinkManager.ts#L19">structures/LavalinkManager.ts:19</a></li>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L19">structures/LavalinkManager.ts:19</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
@@ -2905,7 +2929,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">spotify<wbr>Auth<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>clientId<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>clientSecret<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> }</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/f16f15b/src/structures/LavalinkManager.ts#L35">structures/LavalinkManager.ts:35</a></li>
+						<li>Defined in <a href="https://github.com/discord-rose/lavalink-wrapper/blob/802aca0/src/structures/LavalinkManager.ts#L40">structures/LavalinkManager.ts:40</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-comment tsd-typography">
