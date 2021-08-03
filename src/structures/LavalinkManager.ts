@@ -29,6 +29,11 @@ export interface CompleteLavalinkManagerOptions {
    */
   defaultSource: Source
   /**
+   * The type of CPU load to sort by when getting the least load node.
+   * @default 'system'
+   */
+  leastLoadSort: 'system' | 'lavalink'
+  /**
    * Authentication for the spotify API.
    * This will enable resolving spotify links into youtube tracks.
    */
@@ -205,6 +210,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     this.options = {
       nodeOptions: options.nodeOptions,
       enabledSources: options.enabledSources ?? ['youtube', 'soundcloud'],
+      leastLoadSort: options.leastLoadSort ?? 'system',
       defaultSource: options.defaultSource ?? 'youtube',
       spotifyAuth: options.spotifyAuth
     }
@@ -220,7 +226,7 @@ export class LavalinkManager extends EventEmitter<LavalinkManagerEvents> {
     return this.nodes
       .reduce((p, v) => p.concat(v), [] as Node[])
       .filter((node) => node.state === NodeState.CONNECTED)
-      .sort((a, b) => (a.stats.cpu ? a.stats.cpu.systemLoad / a.stats.cpu.cores : 0) - (b.stats.cpu ? b.stats.cpu.systemLoad / b.stats.cpu.cores : 0))
+      .sort((a, b) => (a.stats.cpu ? a.stats.cpu[this.options.leastLoadSort === 'system' ? 'systemLoad' : 'lavalinkLoad'] / a.stats.cpu.cores : 0) - (b.stats.cpu ? b.stats.cpu[this.options.leastLoadSort === 'system' ? 'systemLoad' : 'lavalinkLoad'] / b.stats.cpu.cores : 0))
   }
 
   /**
