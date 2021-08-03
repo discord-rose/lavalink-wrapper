@@ -297,6 +297,13 @@ export declare class Player extends EventEmitter<PlayerEvents> {
      */
     stop(): Promise<void>;
     /**
+     * Remove a track from the queue.
+     * @param index The index of the track to remove.
+     * @param advanceQueue If the queue should advance if the removed track is the current track playing. If false, the player will be stopped.
+     * @returns The removed track.
+     */
+    remove(index: number, advanceQueue?: boolean): Promise<Track | TrackPartial>;
+    /**
      * Clear the queue.
      * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved.
      */
