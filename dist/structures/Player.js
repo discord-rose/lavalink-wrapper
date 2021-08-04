@@ -344,7 +344,7 @@ class Player extends typed_emitter_1.EventEmitter {
     /**
      * Remove a track from the queue.
      * @param index The index of the track to remove.
-     * @param advanceQueue If the queue should advance if the removed track is the current track playing. If false, the player will be stopped.
+     * @param advanceQueue If the queue should advance if the removed track is the current track playing. If false, the player will be stopped. Defaults to true.
      * @returns The removed track.
      */
     async remove(index, advanceQueue = true) {
@@ -361,9 +361,9 @@ class Player extends typed_emitter_1.EventEmitter {
     }
     /**
      * Clear the queue.
-     * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved.
+     * @param stop If true, if a track is currently playing it will be stopped and removed from the queue. If false, if a track is playing it will be preserved. Defaults to false.
      */
-    async clear(stop) {
+    async clear(stop = false) {
         if (stop)
             await this.stop();
         this.queue = this.currentTrack ? [this.currentTrack] : [];
