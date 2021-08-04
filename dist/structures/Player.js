@@ -438,8 +438,11 @@ class Player extends typed_emitter_1.EventEmitter {
                 await this._advanceQueue();
             });
         }
-        else
+        else {
+            if (this.state > PlayerState.CONNECTED)
+                await this._stop();
             this.queuePosition = null;
+        }
     }
     /**
      * Disconnect the bot from VC.
