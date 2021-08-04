@@ -1,6 +1,6 @@
 {
   "name": "@discord-rose/lavalink",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A lavalink wrapper for discord-rose.",
   "main": "./dist/index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/discord-rose/lavalink-wrapper#readme",
   "dependencies": {
-    "@discordjs/collection": "^0.2.0",
+    "@discordjs/collection": "^0.2.1",
     "@jpbberry/typed-emitter": "^1.0.1",
     "discord-api-types": "^0.21.0",
     "discord-rose": "^1.5.0",
@@ -34,17 +34,17 @@
     "ws": "^8.0.0"
   },
   "devDependencies": {
-    "@types/node": "^16.4.8",
+    "@types/node": "^16.4.11",
     "@types/node-fetch": "^2.5.12",
     "@types/ws": "^7.4.7",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
+    "@typescript-eslint/eslint-plugin": "^4.29.0",
+    "@typescript-eslint/parser": "^4.29.0",
     "eslint": "^7.32.0",
     "eslint-config-standard-with-typescript": "^20.0.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "typedoc": "^0.21.4",
+    "typedoc": "^0.21.5",
     "typescript": "^4.3.5"
   },
   "typings": "./dist/index.d.ts",
