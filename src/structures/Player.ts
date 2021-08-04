@@ -563,7 +563,10 @@ export class Player extends EventEmitter<PlayerEvents> {
         if (this.loop === 'single') (this.queuePosition as number)++
         await this._advanceQueue()
       })
-    } else this.queuePosition = null
+    } else {
+      if (this.state > PlayerState.CONNECTED) await this._stop()
+      this.queuePosition = null
+    }
   }
 
   /**
