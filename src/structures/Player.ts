@@ -551,7 +551,17 @@ export class Player extends EventEmitter<PlayerEvents> {
     }
 
     if (this.currentTrack) {
-      if (this.currentTrack instanceof TrackPartialClass) this.queue[this.queuePosition] = await this.manager.resolveTrack(this.currentTrack)
+      if (this.currentTrack instanceof TrackPartialClass) {
+        const resolved = await this.manager.resolveTrack(this.currentTrack).catch((error) => {
+          this.emit('ERROR', { player: this, error })
+        })
+        if (!resolved) {
+          if (this.loop === 'single') this.queuePosition++
+          await this._advanceQueue()
+          return
+        }
+        this.queue[this.queuePosition] = resolved
+      }
       if (!(this.currentTrack instanceof TrackClass) || !(this.currentTrack).track) {
         this.emit('ERROR', { player: this, error: new Error('Unable to get Track from new queue position while advancing the queue') })
         if (this.loop === 'single') this.queuePosition++
@@ -564,7 +574,7 @@ export class Player extends EventEmitter<PlayerEvents> {
         await this._advanceQueue()
       })
     } else {
-      if (this.state > PlayerState.CONNECTED) await this._stop()
+      if (this.state > PlayerState.CONNECTED) await this._stop().catch(() => {})
       this.queuePosition = null
     }
   }
