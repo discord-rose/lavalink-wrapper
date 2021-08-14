@@ -422,8 +422,18 @@ class Player extends typed_emitter_1.EventEmitter {
                 this.queuePosition = 0;
         }
         if (this.currentTrack) {
-            if (this.currentTrack instanceof Track_1.TrackPartial)
-                this.queue[this.queuePosition] = await this.manager.resolveTrack(this.currentTrack);
+            if (this.currentTrack instanceof Track_1.TrackPartial) {
+                const resolved = await this.manager.resolveTrack(this.currentTrack).catch((error) => {
+                    this.emit('ERROR', { player: this, error });
+                });
+                if (!resolved) {
+                    if (this.loop === 'single')
+                        this.queuePosition++;
+                    await this._advanceQueue();
+                    return;
+                }
+                this.queue[this.queuePosition] = resolved;
+            }
             if (!(this.currentTrack instanceof Track_1.Track) || !(this.currentTrack).track) {
                 this.emit('ERROR', { player: this, error: new Error('Unable to get Track from new queue position while advancing the queue') });
                 if (this.loop === 'single')
@@ -440,7 +450,7 @@ class Player extends typed_emitter_1.EventEmitter {
         }
         else {
             if (this.state > PlayerState.CONNECTED)
-                await this._stop();
+                await this._stop().catch(() => { });
             this.queuePosition = null;
         }
     }
